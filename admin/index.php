@@ -1,9 +1,9 @@
 <?php
 session_start();
-if (isset($_SESSION['student_id'])) {
-    header("Location: student/dashboard.php");
-    exit;
-}
+// if (isset($_SESSION['student_id'])) {
+//     header("Location: student/dashboard.php");
+//     exit;
+// }
 ?>
 
 <!DOCTYPE html>
@@ -12,10 +12,10 @@ if (isset($_SESSION['student_id'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login | IDORM</title>
+    <title>Admin Login | IDORM</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
-    <link rel="icon" type="image/png" href="assets/img/circle-logo.png">
+    <link rel="icon" type="image/png" href="../assets/img/circle-logo.png">
 
     <style>
         :root {
@@ -31,7 +31,7 @@ if (isset($_SESSION['student_id'])) {
             justify-content: center;
             align-items: center;
             background: linear-gradient(135deg, rgba(86, 24, 24, 0.8), rgba(52, 65, 42, 0.8), rgba(112, 93, 49, 0.7)),
-                url('assets/img/dorm-bg.jpg') center/cover no-repeat;
+                url('../assets/img/dorm-bg.jpg') center/cover no-repeat;
             backdrop-filter: blur(5px);
         }
 
@@ -107,12 +107,12 @@ if (isset($_SESSION['student_id'])) {
 
 <body>
     <div class="login-card">
-        <img src="assets/img/logo.png" alt="IDORM Logo">
-        <h3 class="fw-bold text-gold mb-3">Boarder Login</h3>
-        <p class="text-light mb-4">Sign in with your Student ID and password</p>
+        <img src="../assets/img/logo.png" alt="IDORM Logo">
+        <h3 class="fw-bold text-gold mb-3">Admin Login</h3>
+        <p class="text-light mb-4">Sign in with username and password</p>
 
         <form action="includes/processes.php" method="POST">
-            <input type="text" name="student_id" class="form-control" placeholder="Student ID" required>
+            <input type="text" name="username" class="form-control" placeholder="Username" required>
             <input type="password" name="password" class="form-control" placeholder="Password" required>
             <button type="submit" name="login" class="btn btn-login w-100 py-2 mt-2">Sign In</button>
         </form>

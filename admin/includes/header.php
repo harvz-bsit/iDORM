@@ -1,24 +1,11 @@
 <?php
 session_start();
 include '../config/conn.php';
-if (!isset($_SESSION['student_id'])) {
-    header("Location: ../login.php");
-    exit;
-}
+// if (!isset($_SESSION['student_id'])) {
+//     header("Location: ../login.php");
+//     exit;
+// }
 
-$student_id = $_SESSION['student_id'];
-
-$fetchPersonalInformation = "SELECT * FROM user_personal_information WHERE student_id = '$student_id'";
-$personalInfoResult = mysqli_query($conn, $fetchPersonalInformation);
-$personalInfoRow = mysqli_fetch_assoc($personalInfoResult);
-
-$fetchUserTable = "SELECT * FROM users WHERE student_id = '$student_id'";
-$userResult = mysqli_query($conn, $fetchUserTable);
-$student = mysqli_fetch_assoc($userResult);
-
-$fetchFamilyInformation = "SELECT * FROM user_family_background WHERE student_id = '$student_id'";
-$familyInfoResult = mysqli_query($conn, $fetchFamilyInformation);
-$familyInfoRow = mysqli_fetch_assoc($familyInfoResult);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -178,10 +165,11 @@ $familyInfoRow = mysqli_fetch_assoc($familyInfoResult);
             <div class="collapse navbar-collapse" id="navMenu">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item"><a class="nav-link" href="dashboard.php">Dashboard</a></li>
-                    <li class="nav-item"><a class="nav-link" href="payments.php">Payments</a></li>
-                    <li class="nav-item"><a class="nav-link" href="room-info.php">Room Info</a></li>
-                    <li class="nav-item"><a class="nav-link" href="announcements.php">Announcements</a></li>
-                    <li class="nav-item"><a class="nav-link" href="profile.php">Profile</a></li>
+                    <li class="nav-item"><a class="nav-link" href="rooms.php">Rooms</a></li>
+                    <li class="nav-item"><a class="nav-link" href="applications.php">Applications</a></li>
+                    <li class="nav-item"><a class="nav-link" href="requests.php">Requests</a></li>
+                    <li class="nav-item"><a class="nav-link" href="contracts.php">Contracts</a></li>
+                    <li class="nav-item"><a class="nav-link" href="reports.php">Reports</a></li>
                     <li class="nav-item"><a class="nav-link text-danger btn btn-gold ms-3" href="../includes/logout.php">Logout</a></li>
                 </ul>
             </div>

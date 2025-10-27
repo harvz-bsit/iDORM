@@ -12,96 +12,114 @@ include 'includes/header.php';
 
     <!-- Summary Cards -->
     <div class="row g-4 mb-4">
-        <div class="col-md-4">
-            <div class="card shadow-sm border-0 text-center p-4">
-                <h6 class="text-uppercase text-muted mb-2">Current Month</h6>
-                <h4 class="fw-bold text-green">October 2025</h4>
-                <span class="badge bg-success px-3 py-2 mt-2">Paid</span>
-            </div>
-        </div>
+        <?php
+        $check_approval = "SELECT status, remarks FROM application_approvals WHERE student_id = '$student_id' ORDER BY id DESC LIMIT 1";
+        $approval_result = mysqli_query($conn, $check_approval);
+        $approval_row = mysqli_fetch_assoc($approval_result);
 
-        <div class="col-md-4">
-            <div class="card shadow-sm border-0 text-center p-4">
-                <h6 class="text-uppercase text-muted mb-2">Next Due</h6>
-                <h4 class="fw-bold text-maroon">November 5, 2025</h4>
-                <span class="badge bg-warning text-dark px-3 py-2 mt-2">Upcoming</span>
+        if ($approval_row && $approval_row['status'] === 'Approved') {
+        ?>
+            <div class="col-md-4">
+                <div class="card shadow-sm border-0 text-center p-4">
+                    <h6 class="text-uppercase text-muted mb-2">Current Month</h6>
+                    <h4 class="fw-bold text-green">October 2025</h4>
+                    <span class="badge bg-success px-3 py-2 mt-2">Paid</span>
+                </div>
             </div>
-        </div>
 
-        <div class="col-md-4">
-            <div class="card shadow-sm border-0 text-center p-4">
-                <h6 class="text-uppercase text-muted mb-2">Total Balance</h6>
-                <h4 class="fw-bold text-gold">₱0.00</h4>
-                <p class="text-muted small mb-0">You are fully paid up to date 🎉</p>
+            <div class="col-md-4">
+                <div class="card shadow-sm border-0 text-center p-4">
+                    <h6 class="text-uppercase text-muted mb-2">Next Due</h6>
+                    <h4 class="fw-bold text-maroon">November 5, 2025</h4>
+                    <span class="badge bg-warning text-dark px-3 py-2 mt-2">Upcoming</span>
+                </div>
             </div>
-        </div>
-    </div>
 
-    <!-- Payment History -->
-    <div class="card border-0 shadow-sm">
-        <div class="card-body">
-            <h5 class="fw-bold text-maroon mb-3">Payment History</h5>
-            <div class="table-responsive">
-                <table class="table align-middle">
-                    <thead class="table-light">
-                        <tr>
-                            <th scope="col">Month</th>
-                            <th scope="col">Amount</th>
-                            <th scope="col">Date Paid</th>
-                            <th scope="col">Status</th>
-                            <th scope="col">Receipt</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>October 2025</td>
-                            <td>₱750</td>
-                            <td>Oct 5, 2025</td>
-                            <td><span class="badge bg-success">Paid</span></td>
-                            <td>
-                                <button class="btn btn-outline-gold btn-sm view-receipt-btn" data-bs-toggle="modal" data-bs-target="#receiptModal"
-                                    data-month="October 2025"
-                                    data-amount="₱750"
-                                    data-date="October 5, 2025"
-                                    data-receipt="../assets/img/receipt-sample.jpg">
-                                    View
-                                </button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>September 2025</td>
-                            <td>₱750</td>
-                            <td>Sep 4, 2025</td>
-                            <td><span class="badge bg-success">Paid</span></td>
-                            <td>
-                                <button class="btn btn-outline-gold btn-sm view-receipt-btn" data-bs-toggle="modal" data-bs-target="#receiptModal"
-                                    data-month="September 2025"
-                                    data-amount="₱750"
-                                    data-date="September 4, 2025"
-                                    data-receipt="../assets/img/receipt-sample.jpg">
-                                    View
-                                </button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>August 2025</td>
-                            <td>₱750</td>
-                            <td>Aug 10, 2025</td>
-                            <td><span class="badge bg-danger">Late</span></td>
-                            <td>
-                                <button class="btn btn-outline-gold btn-sm view-receipt-btn" data-bs-toggle="modal" data-bs-target="#receiptModal"
-                                    data-month="August 2025"
-                                    data-amount="₱750"
-                                    data-date="August 10, 2025"
-                                    data-receipt="../assets/img/receipt-sample.jpg">
-                                    View
-                                </button>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+            <div class="col-md-4">
+                <div class="card shadow-sm border-0 text-center p-4">
+                    <h6 class="text-uppercase text-muted mb-2">Total Balance</h6>
+                    <h4 class="fw-bold text-gold">₱0.00</h4>
+                    <p class="text-muted small mb-0">You are fully paid up to date 🎉</p>
+                </div>
             </div>
-        </div>
+
+            <!-- Payment History -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <h5 class="fw-bold text-maroon mb-3">Payment History</h5>
+                    <div class="table-responsive">
+                        <table class="table align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th scope="col">Month</th>
+                                    <th scope="col">Amount</th>
+                                    <th scope="col">Date Paid</th>
+                                    <th scope="col">Status</th>
+                                    <th scope="col">Receipt</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>October 2025</td>
+                                    <td>₱750</td>
+                                    <td>Oct 5, 2025</td>
+                                    <td><span class="badge bg-success">Paid</span></td>
+                                    <td>
+                                        <button class="btn btn-outline-gold btn-sm view-receipt-btn" data-bs-toggle="modal" data-bs-target="#receiptModal"
+                                            data-month="October 2025"
+                                            data-amount="₱750"
+                                            data-date="October 5, 2025"
+                                            data-receipt="../assets/img/receipt-sample.jpg">
+                                            View
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>September 2025</td>
+                                    <td>₱750</td>
+                                    <td>Sep 4, 2025</td>
+                                    <td><span class="badge bg-success">Paid</span></td>
+                                    <td>
+                                        <button class="btn btn-outline-gold btn-sm view-receipt-btn" data-bs-toggle="modal" data-bs-target="#receiptModal"
+                                            data-month="September 2025"
+                                            data-amount="₱750"
+                                            data-date="September 4, 2025"
+                                            data-receipt="../assets/img/receipt-sample.jpg">
+                                            View
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>August 2025</td>
+                                    <td>₱750</td>
+                                    <td>Aug 10, 2025</td>
+                                    <td><span class="badge bg-danger">Late</span></td>
+                                    <td>
+                                        <button class="btn btn-outline-gold btn-sm view-receipt-btn" data-bs-toggle="modal" data-bs-target="#receiptModal"
+                                            data-month="August 2025"
+                                            data-amount="₱750"
+                                            data-date="August 10, 2025"
+                                            data-receipt="../assets/img/receipt-sample.jpg">
+                                            View
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        <?php
+        } else {
+        ?>
+            <div class="col-12">
+                <div class="alert alert-warning text-center" role="alert">
+                    Your application is not approved yet. Payment details will be available once approved.
+                </div>
+            </div>
+        <?php
+        }
+        ?>
     </div>
 </div>
 

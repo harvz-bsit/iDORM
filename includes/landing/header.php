@@ -15,7 +15,7 @@
     <link rel="stylesheet" href="assets/css/style.css">
 
     <!-- Favicon -->
-    <link rel="icon" type="image/png" href="assets/img/logo.png">
+    <link rel="icon" type="image/png" href="assets/img/circle-logo.png">
 </head>
 
 <body>

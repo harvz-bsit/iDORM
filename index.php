@@ -1,4 +1,10 @@
-<?php include 'includes/landing/header.php'; ?>
+<?php
+include 'includes/landing/header.php';
+if (isset($_SESSION['student_id'])) {
+    header("Location: student/dashboard.php");
+    exit;
+}
+?>
 
 <!-- Hero Section -->
 <section class="hero position-relative d-flex align-items-center justify-content-center text-center text-white">
