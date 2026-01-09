@@ -3,6 +3,7 @@ include '../config/conn.php';
 
 // Login Using Student ID and Password (Hashed)
 if (isset($_POST['login'])) {
+
     $student_id = mysqli_real_escape_string($conn, $_POST['student_id']);
     $password = mysqli_real_escape_string($conn, $_POST['password']);
 
@@ -11,16 +12,31 @@ if (isset($_POST['login'])) {
 
     if (mysqli_num_rows($result) === 1) {
         $row = mysqli_fetch_assoc($result);
-        if (password_verify($password, $row['password'])) {
-            // Successful login
-            session_start();
-            $_SESSION['student_id'] = $row['student_id'];
-            header("Location: ../student/dashboard.php");
-            exit();
+        if ($row['role'] == 'student') {
+            if (password_verify($password, $row['password'])) {
+                // Successful login
+                session_start();
+                $_SESSION['student_id'] = $row['student_id'];
+                header("Location: ../student/dashboard.php");
+                exit();
+            } else {
+                // Incorrect password
+                header("Location: ../login.php?error=Incorrect Student ID or Password");
+                exit();
+            }
         } else {
-            // Incorrect password
-            header("Location: ../login.php?error=Incorrect Student ID or Password");
-            exit();
+            if (password_verify($password, $row['password'])) {
+                // Successful login for admin or staff
+                session_start();
+                $_SESSION['user_id'] = $row['id'];
+                $_SESSION['role'] = $row['role'];
+                header("Location: ../admin/dashboard.php");
+                exit();
+            } else {
+                // Incorrect password
+                header("Location: ../login.php?error=Incorrect Student ID or Password");
+                exit();
+            }
         }
     } else {
         // Student ID not found
@@ -127,7 +143,7 @@ if (isset($_POST['submit'])) {
                  VALUES ('$student_id', '$father_name', '$father_occupation', '$father_age', '$father_contact', '$mother_name', '$mother_occupation', '$mother_age', '$mother_contact', '$guardian_name', '$guardian_contact', '$guardian_relation', '$parent_income', '$siblings')";
         $result4 = mysqli_query($conn, $sql4);
 
-        $sql5 = "INSERT INTO user_medical_history (student_id, height, weight, blood_type, allergies, conditions, illness_history, current_medication, communicable, communicable_name, communicable_medication, mental_health, mental_health_name, mental_health_medication, physical, physical_name, physical_medication, last_med_checkup menstrual_cycle, reproductive_issue, reproductive_specify, reproductive_medication, last_checkup, due_date, physician_name, physician_contact) 
+        $sql5 = "INSERT INTO user_medical_history (student_id, height, weight, blood_type, allergies, conditions, illness_history, current_medication, communicable, communicable_name, communicable_medication, mental_health, mental_health_name, mental_health_medication, physical, physical_name, physical_medication, last_med_checkup, menstrual_cycle, reproductive_issue, reproductive_specify, reproductive_medication, last_checkup, due_date, physician_name, physician_contact) 
                  VALUES ('$student_id', '$height', '$weight', '$blood_type', '$allergies', '$conditions', '$illness_history', '$current_medication', '$communicable', '$communicable_name', '$communicable_medication', '$mental_health', '$mental_health_name', '$mental_health_medication', '$physical', '$physical_name', '$last_med_checkup', '$physical_medication', '$menstrual_cycle', '$reproductive_issue', '$reproductive_specify', '$reproductive_medication', '$last_checkup', '$due_date', '$physician_name', '$physician_contact')";
         $result5 = mysqli_query($conn, $sql5);
 
@@ -234,4 +250,68 @@ if (isset($_POST['updatePassword'])) {
         header("Location: ../student/profile.php?error=Current password is incorrect.&student_id=$student_id");
         exit();
     }
+}
+
+// Save Signed Contract
+if (isset($_POST['signature']) && isset($_POST['student_id'])) {
+    $student_id = $_POST['student_id'];
+    $signature_data = $_POST['signature'];
+
+    // Decode the base64 encoded image
+    $signature_data = str_replace('data:image/png;base64,', '', $signature_data);
+    $signature_data = str_replace(' ', '+', $signature_data);
+    $signature_image = base64_decode($signature_data);
+
+    // Save the signature image to a file
+    $file_path = '../signatures/' . $student_id . '_signature.png';
+    file_put_contents($file_path, $signature_image);
+
+    // Insert contract record into database
+    $sql = "INSERT INTO contracts (student_id, signature_path, status, signed_at) VALUES ('$student_id', '$file_path', 'Signed', NOW())";
+    $result = mysqli_query($conn, $sql);
+
+    if ($result) {
+        header("Location: ../student/dashboard.php?success=Contract signed successfully.");
+        exit();
+    } else {
+        header("Location: ../student/sign_contract.php?error=Error saving contract. Please try again.");
+        exit();
+    }
+}
+
+// Add New Room
+if (isset($_POST['room_save'])) {
+    $room_number = $_POST['room_number'];
+    $room_capacity = $_POST['room_capacity'];
+    $room_status = $_POST['room_status'];
+
+    $sql = "INSERT INTO rooms (room_number, capacity, status) VALUES ('$room_number', '$room_capacity', '$room_status')";
+    $result = mysqli_query($conn, $sql);
+
+    if ($result) {
+        header("Location: ../admin/rooms.php?success=Room added successfully.");
+        exit();
+    } else {
+        header("Location: ../admin/rooms.php?error=Error adding room. Please try again.");
+        exit();
+    }
+}
+
+// Assign Students to Room
+if (isset($_POST['assignRoom'])) {
+    $room_id = $_POST['room_id'];
+    $students = $_POST['students'] ?? [];
+
+    if (empty($students)) {
+        header("Location: ../admin/rooms.php?error=No students selected for assignment.");
+        exit();
+    }
+
+    foreach ($students as $student_id) {
+        $sql = "INSERT INTO room_assignments (student_id, room_num, assigned_at) VALUES ('$student_id', '$room_id', NOW())";
+        mysqli_query($conn, $sql);
+    }
+
+    header("Location: ../admin/rooms.php?success=Students assigned to room successfully.");
+    exit();
 }

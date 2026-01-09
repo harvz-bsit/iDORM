@@ -80,18 +80,39 @@ $row = mysqli_fetch_assoc($result);
             <li>
                 <span class="d-flex align-items-center flex-wrap gap-2">
                     <b>Term.</b> This contract will be for the
-                    <input type="text" class="form-control form-control-sm w-25" placeholder="Semester"> Term of School Year <b><?php echo date('Y') ?>-<?php echo date('Y') + 1 ?></b> beginning
+                    <input type="text" class="form-control form-control-sm w-25" placeholder="Enter Semester"> Term of School Year <b><?php echo date('Y') ?>-<?php echo date('Y') + 1 ?></b> beginning
                     in the month of <b><?php echo date('M m, Y') ?></b> and ending on
-                    <input type="text" class="form-control form-control-sm w-25" placeholder="Month">.
+                    <input type="text" class="form-control form-control-sm w-25" placeholder="Enter Month">.
                 </span>
             </li>
             <li><b>Admission and Retention.</b> Only officially enrolled student with at least 15 units and within the priority list (scholar, first year students,
                 and those from far flung area student) can be accommodated. However, the students who are graduating can be accommodated as they are exempted to the policy. Failure
                 to check in during the first week of the semester means cancellation of slot.</li>
-
+            <li>
+                <b>Dormitory Fee and Payment.</b>Monthly dormitory fee is <b>750</b>. The dormitory fee can be paid in advance in full for the whole
+                duration of accommodation, an advance payment of dormitory fee shall be made which shall serve as security deposit, and can be offset,
+                or use for payment for the last month of accommodation, provided the student resident is clear from any obligations. Dormitory fee is inclusive of electricity,
+                and water utilities. Payment of dormitory fee shall be made directly at Cashier's Office. Note that dormitory payment is non-transferable and non-refundable and
+                failure to settle financial obligation will not be accepted for the following semester/term.
+            </li>
+            <li>
+                <b>Amenities.</b> The Ladies' Dormitory is provided with refrigerator, chest freeze, television, water dispenser and wall fan. Each student resident is reponsible for the
+                care and proper use of furniture and fixtures provided therein. Each student resident is only allowed to bring two (2) gadgets/appliances at most. Any prohibited or undeclared
+                gadgets/appliances are sufficient termination of accommodation.
+            </li>
+            <li>
+                <b>Liability of Student Resident.</b> Each student resident shall be responsible for their own garbage collection, segregation and disposal. Student resident are likewise responsible for the area
+                rented and damages incurred to the property shall be replaced by them.
+            </li>
+            <li><b>Adherance to College's Dormitory Policies.</b> Each student resident shall strictly observe and adhere to the policies, dormitory rules and regulations,
+                norm of conduct and responsibility of dorm residents and in the Accommodation and Housing Contract Terms and Condition attached below.
+            </li>
         </ol>
 
         <div class="mt-4">
+            In compliance with Republic Act No. 10173 (Data Privacy Act of 2012), the Management ensures that: All personal and sensitive information provided by the student shall be kept
+            secure and confidential. Information will only be used for legitimate dormitory operations such as billing, security, and emergency response. The student has the right to access,
+            correct, or requests the deletion of their personal data.
             <input type="checkbox" id="agree" required> I have read and understood the terms and conditions.
         </div>
 
@@ -106,8 +127,9 @@ $row = mysqli_fetch_assoc($result);
                 <button type="button" class="btn btn-outline-secondary" id="clear">Clear</button>
             </div>
 
-            <form id="contractForm" method="POST" action="save_signature.php" class="mt-3">
+            <form id="contractForm" method="POST" action="../includes/processes.php" class="mt-3">
                 <input type="hidden" name="signature" id="signature">
+                <input type="hidden" name="student_id" value="<?php echo $student_id; ?>">
                 <button type="submit" class="btn btn-success px-5">Submit Contract</button>
             </form>
         </div>

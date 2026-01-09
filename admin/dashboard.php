@@ -1,6 +1,11 @@
 <?php
 $pageTitle = "Dashboard";
 include 'includes/header.php';
+
+if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
+    header('Location: ../login.php');
+    exit();
+}
 ?>
 
 <div class="container py-5">
