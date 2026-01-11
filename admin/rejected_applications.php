@@ -1,26 +1,26 @@
 <?php
-$pageTitle = "Applications";
+$pageTitle = "Rejected Applications";
 include 'includes/header.php';
 include '../config/conn.php';
 
 // Fetch pending applicants
-$result = $conn->query("SELECT * FROM application_approvals WHERE status='Pending'");
+$result = $conn->query("SELECT * FROM application_approvals WHERE status='Rejected'");
 ?>
 
 <div class="container py-5 vh-100">
     <div class="dashboard-header">
-        <h1 class="fw-bold text-maroon">Manage Applications</h1>
-        <p class="lead">Review, approve, or reject pending applications.</p>
+        <h1 class="fw-bold text-maroon">Rejected Applications</h1>
+        <p class="lead">Review rejected applications.</p>
         <div class="divider"></div>
     </div>
 
     <div class="my-4 d-flex justify-content-end">
-        <!-- Buttons for approved and rejected table  -->
+        <!-- Buttons for pending and approved table  -->
         <a href="approved_applications.php" class="btn btn-success me-2">
             <i class="bi bi-check-circle"></i> Approved
         </a>
-        <a href="rejected_applications.php" class="btn btn-danger">
-            <i class="bi bi-x-circle"></i> Rejected
+        <a href="applications.php" class="btn btn-primary me-2">
+            <i class="bi bi-hourglass-split"></i> Pending
         </a>
     </div>
 
@@ -31,7 +31,6 @@ $result = $conn->query("SELECT * FROM application_approvals WHERE status='Pendin
             <input type="text" id="searchInput" class="form-control" placeholder="name, email, course, or year...">
         </div>
     </div>
-
     <!-- Applications Table -->
     <div class="card shadow-sm p-4">
         <table class="table table-hover align-middle">
@@ -52,7 +51,7 @@ $result = $conn->query("SELECT * FROM application_approvals WHERE status='Pendin
                 $count = 1;
 
                 if ($result->num_rows < 1) {
-                    echo '<tr><td colspan="8" class="text-center text-muted">No pending applications found.</td></tr>';
+                    echo '<tr><td colspan="8" class="text-center text-muted">No rejected applications found.</td></tr>';
                 } else {
                     while ($row = $result->fetch_assoc()) {
                         $student_id = $row['student_id'];
@@ -228,7 +227,6 @@ $result = $conn->query("SELECT * FROM application_approvals WHERE status='Pendin
         noMatchRow.style.display = visibleCount === 0 ? '' : 'none';
     });
 </script>
-
 
 
 <?php include 'includes/footer.php'; ?>

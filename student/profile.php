@@ -5,7 +5,7 @@ include 'includes/header.php';
 
 ?>
 
-<div class="container py-5">
+<div class="container py-5 min-vh-100">
     <div class="row justify-content-center">
         <div class="col-lg-8">
             <div class="card shadow-sm border-0">

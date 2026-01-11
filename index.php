@@ -2,7 +2,8 @@
 include 'includes/landing/header.php';
 if (isset($_SESSION['student_id'])) {
     header("Location: student/dashboard.php");
-    exit;
+} else if (isset($_SESSION['admin'])) {
+    header("Location: admin/dashboard.php");
 }
 ?>
 

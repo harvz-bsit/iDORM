@@ -28,8 +28,7 @@ if (isset($_POST['login'])) {
             if (password_verify($password, $row['password'])) {
                 // Successful login for admin or staff
                 session_start();
-                $_SESSION['user_id'] = $row['id'];
-                $_SESSION['role'] = $row['role'];
+                $_SESSION['admin'] = $row['student_id'];
                 header("Location: ../admin/dashboard.php");
                 exit();
             } else {
@@ -256,6 +255,10 @@ if (isset($_POST['updatePassword'])) {
 if (isset($_POST['signature']) && isset($_POST['student_id'])) {
     $student_id = $_POST['student_id'];
     $signature_data = $_POST['signature'];
+    $semester = $_POST['sem'];
+    $school_year = $_POST['school_year'];
+    $contract_start = $_POST['start_month'];
+    $contract_end = $_POST['end_month'];
 
     // Decode the base64 encoded image
     $signature_data = str_replace('data:image/png;base64,', '', $signature_data);
@@ -267,7 +270,7 @@ if (isset($_POST['signature']) && isset($_POST['student_id'])) {
     file_put_contents($file_path, $signature_image);
 
     // Insert contract record into database
-    $sql = "INSERT INTO contracts (student_id, signature_path, status, signed_at) VALUES ('$student_id', '$file_path', 'Signed', NOW())";
+    $sql = "INSERT INTO contracts (student_id, signature_path, status, signed_at, semester, school_year, contract_start, contract_end) VALUES ('$student_id', '$file_path', 'Signed', NOW(), '$semester', '$school_year', '$contract_start', '$contract_end')";
     $result = mysqli_query($conn, $sql);
 
     if ($result) {
@@ -308,10 +311,307 @@ if (isset($_POST['assignRoom'])) {
     }
 
     foreach ($students as $student_id) {
-        $sql = "INSERT INTO room_assignments (student_id, room_num, assigned_at) VALUES ('$student_id', '$room_id', NOW())";
-        mysqli_query($conn, $sql);
+        mysqli_query($conn, "INSERT INTO room_assignments (student_id, room_num, assigned_at) VALUES ('$student_id', '$room_id', NOW())");
+        mysqli_query($conn, "UPDATE rooms SET occupied = occupied + 1 WHERE room_number = '$room_id'");
+
+        // Get room capacity & occupied
+        $roomQuery = mysqli_query($conn, "
+        SELECT capacity, occupied 
+        FROM rooms 
+        WHERE room_number = '$room_id'
+    ");
+        $roomData = mysqli_fetch_assoc($roomQuery);
+
+        if ($roomData['occupied'] >= $roomData['capacity']) {
+            mysqli_query($conn, "UPDATE rooms SET status='Full' WHERE room_number = '$room_id'");
+        }
     }
 
     header("Location: ../admin/rooms.php?success=Students assigned to room successfully.");
     exit();
+}
+
+if (isset($_POST['updateRoom'])) {
+    $id = $_POST['room_id'];
+    $room = $_POST['room_number'];
+    $capacity = $_POST['capacity'];
+    $status = $_POST['status'];
+
+    mysqli_query($conn, "
+        UPDATE rooms
+        SET room_number='$room',
+            capacity='$capacity',
+            status='$status'
+        WHERE id='$id'
+    ");
+
+    $roomQuery = mysqli_query($conn, "
+        SELECT capacity, occupied 
+        FROM rooms 
+        WHERE room_number = '$room'
+    ");
+    $roomData = mysqli_fetch_assoc($roomQuery);
+
+    if ($roomData['occupied'] >= $roomData['capacity']) {
+        mysqli_query($conn, "UPDATE rooms SET status='Full' WHERE room_number = '$room'");
+    } else {
+        mysqli_query($conn, "UPDATE rooms SET status='Available' WHERE room_number = '$room'");
+    }
+
+    header("Location: ../admin/rooms.php");
+    exit;
+}
+
+if (isset($_POST['deleteRoom'])) {
+    $id = $_POST['room_id'];
+
+    mysqli_query($conn, "DELETE FROM rooms WHERE id='$id'");
+
+    header("Location: ../admin/rooms.php");
+    exit;
+}
+
+// UPDATE CONTRACT
+if (isset($_POST['updateContract'])) {
+    $id = $_POST['contract_id'];
+    $status = $_POST['status'];
+
+    mysqli_query($conn, "UPDATE contracts SET status='$status' WHERE id='$id'");
+    header("Location: ../admin/contracts.php");
+    exit;
+}
+
+// DELETE CONTRACT
+if (isset($_POST['deleteContract'])) {
+    $id = $_POST['contract_id'];
+
+    mysqli_query($conn, "DELETE FROM contracts WHERE id='$id'");
+    header("Location: ../admin/contracts.php");
+    exit;
+}
+
+// ===== Maintenance Request =====
+if (isset($_POST['issue']) && isset($_POST['student_id'])) {
+    $student_id = $_POST['student_id'];
+    $issue = trim($_POST['issue']);
+
+    if (empty($issue)) {
+        echo json_encode(['status' => 'error', 'message' => 'Please describe the issue.']);
+        exit;
+    }
+
+    $stmt = $conn->prepare("INSERT INTO maintenance_requests (student_id, issue, status, requested_at) VALUES (?, ?, 'Pending', NOW())");
+    $stmt->bind_param("ss", $student_id, $issue);
+
+    if ($stmt->execute()) {
+        echo json_encode(['status' => 'success', 'message' => 'Maintenance request submitted successfully.']);
+    } else {
+        echo json_encode(['status' => 'error', 'message' => 'Database error: ' . $stmt->error]);
+    }
+    $stmt->close();
+    exit;
+}
+
+// 
+if (isset($_POST['subject']) && isset($_POST['details']) && isset($_POST['student_id'])) {
+    $student_id = $_POST['student_id'];
+    $subject = trim($_POST['subject']);
+    $details = trim($_POST['details']);
+
+    if (empty($subject) || empty($details)) {
+        echo json_encode(['status' => 'error', 'message' => 'Please fill in all fields.']);
+        exit;
+    }
+
+    $stmt = $conn->prepare("INSERT INTO complaints (student_id, subject, details, status, submitted_at) VALUES (?, ?, ?, 'Pending', NOW())");
+    $stmt->bind_param("sss", $student_id, $subject, $details);
+
+    if ($stmt->execute()) {
+        echo json_encode(['status' => 'success', 'message' => 'Complaint submitted successfully.']);
+    } else {
+        echo json_encode(['status' => 'error', 'message' => 'Database error: ' . $stmt->error]);
+    }
+    $stmt->close();
+    exit;
+}
+
+if ($_GET['action'] === 'upload_receipt') {
+    $student_id = $_POST['student_id'] ?? 0;
+    $month_paid = $_POST['month_paid'] ?? '';
+    $amount = $_POST['amount'] ?? '';
+    $file = $_FILES['receipt_file'] ?? null;
+
+    if (!$month_paid || !$amount || !$file) {
+        echo json_encode(['status' => 'error', 'message' => 'All fields are required']);
+        exit;
+    }
+
+    // Save file
+    $ext = pathinfo($file['name'], PATHINFO_EXTENSION);
+    $filename = "receipt_{$student_id}_" . time() . ".{$ext}";
+    $targetDir = "../receipts/";
+    if (!is_dir($targetDir)) mkdir($targetDir, 0755, true);
+    $targetPath = $targetDir . $filename;
+
+    if (!move_uploaded_file($file['tmp_name'], $targetPath)) {
+        echo json_encode(['status' => 'error', 'message' => 'Failed to upload file']);
+        exit;
+    }
+
+    // Insert into DB
+    $stmt = $conn->prepare("INSERT INTO payment_receipts (student_id, amount, month_paid, receipt_path, status, paid_at) VALUES (?, ?, ?, ?, 'Pending', NOW())");
+    $stmt->bind_param("sdss", $student_id, $amount, $month_paid, $targetPath);
+
+    if ($stmt->execute()) {
+        echo json_encode(['status' => 'success', 'message' => 'Receipt uploaded successfully! Awaiting admin approval.']);
+    } else {
+        echo json_encode(['status' => 'error', 'message' => 'Database error: ' . $stmt->error]);
+    }
+
+    $stmt->close();
+    exit;
+}
+
+if ($_GET['action'] === 'update_receipt_status') {
+    $input = json_decode(file_get_contents('php://input'), true);
+    $id = $input['id'] ?? 0;
+    $status = $input['status'] ?? '';
+
+    if (!$id || !in_array($status, ['Approved', 'Rejected'])) {
+        echo json_encode(['status' => 'error', 'message' => 'Invalid request']);
+        exit;
+    }
+
+    $stmt = $conn->prepare("UPDATE payment_receipts SET status=? WHERE id=?");
+    $stmt->bind_param("si", $status, $id);
+
+    if ($stmt->execute()) {
+        echo json_encode(['status' => 'success', 'message' => 'Receipt status updated']);
+    } else {
+        echo json_encode(['status' => 'error', 'message' => 'Database error: ' . $stmt->error]);
+    }
+    $stmt->close();
+    exit;
+}
+
+// Maintenance Requests
+if (isset($_POST['resolve_maintenance'])) {
+    $id = $_POST['maintenance_id'];
+    $stmt = $conn->prepare("UPDATE maintenance_requests SET status='Resolved' WHERE id=?");
+    $stmt->bind_param("i", $id);
+    $stmt->execute();
+    header("Location: ../admin/requests.php");
+    exit;
+}
+
+// Complaints
+if (isset($_POST['resolve_complaint'])) {
+    $id = $_POST['complaint_id'];
+    $stmt = $conn->prepare("UPDATE complaints SET status='Addressed' WHERE id=?");
+    $stmt->bind_param("i", $id);
+    $stmt->execute();
+    header("Location: ../admin/requests.php");
+    exit;
+}
+
+// Passlip Requests
+if (isset($_POST['approve_passlip'])) {
+    $id = $_POST['passlip_id'];
+    $stmt = $conn->prepare("UPDATE passlips SET status='Approved' WHERE id=?");
+    $stmt->bind_param("i", $id);
+    $stmt->execute();
+    header("Location: ../admin/requests.php");
+    exit;
+}
+
+if (isset($_POST['reject_passlip'])) {
+    $id = $_POST['passlip_id'];
+    $stmt = $conn->prepare("UPDATE passlips SET status='Rejected' WHERE id=?");
+    $stmt->bind_param("i", $id);
+    $stmt->execute();
+    header("Location: ../admin/requests.php");
+    exit;
+}
+
+if (isset($_POST['add_announcement'])) {
+
+    $title = trim($_POST['title']);
+    $message = trim($_POST['message']);
+
+    if (empty($title) || empty($message)) {
+        header("Location: ../admin/announcements.php?error=empty");
+        exit;
+    }
+
+    $stmt = $conn->prepare(
+        "INSERT INTO announcements (title, description) VALUES (?, ?)"
+    );
+    $stmt->bind_param("ss", $title, $message);
+
+    if ($stmt->execute()) {
+        header("Location: ../admin/announcements.php?success=added");
+    } else {
+        header("Location: ../admin/announcements.php?error=failed");
+    }
+
+    $stmt->close();
+    exit;
+}
+
+/*
+|--------------------------------------------------------------------------
+| EDIT ANNOUNCEMENT
+|--------------------------------------------------------------------------
+*/
+if (isset($_POST['edit_announcement'])) {
+
+    $id = $_POST['announcement_id'];
+    $title = trim($_POST['title']);
+    $message = trim($_POST['message']);
+
+    if (empty($id) || empty($title) || empty($message)) {
+        header("Location: ../admin/announcements.php?error=empty");
+        exit;
+    }
+
+    $stmt = $conn->prepare(
+        "UPDATE announcements SET title = ?, description = ? WHERE id = ?"
+    );
+    $stmt->bind_param("ssi", $title, $message, $id);
+
+    if ($stmt->execute()) {
+        header("Location: ../admin/announcements.php?success=updated");
+    } else {
+        header("Location: ../admin/announcements.php?error=failed");
+    }
+
+    $stmt->close();
+    exit;
+}
+
+/*
+|--------------------------------------------------------------------------
+| DELETE ANNOUNCEMENT
+|--------------------------------------------------------------------------
+*/
+if (isset($_POST['delete_announcement'])) {
+
+    $id = $_POST['announcement_id'];
+
+    if (empty($id)) {
+        header("Location: ../admin/announcements.php?error=invalid");
+        exit;
+    }
+
+    $stmt = $conn->prepare("DELETE FROM announcements WHERE id = ?");
+    $stmt->bind_param("i", $id);
+
+    if ($stmt->execute()) {
+        header("Location: ../admin/announcements.php?success=deleted");
+    } else {
+        header("Location: ../admin/announcements.php?error=failed");
+    }
+
+    $stmt->close();
+    exit;
 }

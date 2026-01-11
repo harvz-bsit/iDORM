@@ -1,10 +1,10 @@
 <?php
 session_start();
 include '../config/conn.php';
-// if (!isset($_SESSION['student_id'])) {
-//     header("Location: ../login.php");
-//     exit;
-// }
+if (!isset($_SESSION['admin']) || $_SESSION['admin'] !== '00000') {
+    header("Location: ../login.php");
+    exit;
+}
 
 ?>
 <!DOCTYPE html>
@@ -165,10 +165,20 @@ include '../config/conn.php';
             <div class="collapse navbar-collapse" id="navMenu">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item"><a class="nav-link" href="dashboard.php">Dashboard</a></li>
-                    <li class="nav-item"><a class="nav-link" href="rooms.php">Rooms</a></li>
-                    <li class="nav-item"><a class="nav-link" href="applications.php">Applications</a></li>
-                    <li class="nav-item"><a class="nav-link" href="requests.php">Requests</a></li>
-                    <li class="nav-item"><a class="nav-link" href="contracts.php">Contracts</a></li>
+                    <!-- Dropdown for Manage Pages -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="manageDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Manage
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="manageDropdown">
+                            <li><a class="dropdown-item" href="contracts.php">Contracts</a></li>
+                            <li><a class="dropdown-item" href="applications.php">Applications</a></li>
+                            <li><a class="dropdown-item" href="rooms.php">Rooms</a></li>
+                            <li><a class="dropdown-item" href="payments.php">Payments</a></li>
+                            <li><a class="dropdown-item" href="requests.php">Requests</a></li>
+                            <li><a class="dropdown-item" href="announcements.php">Announcements</a></li>
+                        </ul>
+                    </li>
                     <li class="nav-item"><a class="nav-link" href="reports.php">Reports</a></li>
                     <li class="nav-item"><a class="nav-link text-danger btn btn-gold ms-3" href="../includes/logout.php">Logout</a></li>
                 </ul>

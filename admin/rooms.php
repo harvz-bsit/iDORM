@@ -48,9 +48,30 @@
                                     echo "<span class='badge $badgeClass'>$status</span>";
                                     ?></td>
                                 <td>
-                                    <button class="btn btn-outline-maroon btn-sm me-1" data-bs-toggle="modal" data-bs-target="#viewRoomModal" data-room="<?php echo $room['room_number']; ?>"><i class="bi bi-eye"></i></button>
-                                    <button class="btn btn-outline-warning btn-sm me-1"><i class="bi bi-pencil"></i></button>
-                                    <button class="btn btn-outline-danger btn-sm"><i class="bi bi-trash"></i></button>
+                                    <button class="btn btn-outline-maroon btn-sm me-1"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#viewRoomModal"
+                                        data-room="<?= $room['room_number']; ?>"
+                                        data-capacity="<?= $room['capacity']; ?>"
+                                        data-occupied="<?= $room['occupied']; ?>">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+                                    <button class="btn btn-outline-warning btn-sm me-1 edit-room-btn"
+                                        data-id="<?= $room['id'] ?>"
+                                        data-room="<?= $room['room_number'] ?>"
+                                        data-capacity="<?= $room['capacity'] ?>"
+                                        data-status="<?= $room['status'] ?>"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#editRoomModal">
+                                        <i class="bi bi-pencil"></i>
+                                    </button>
+                                    <button class="btn btn-outline-danger btn-sm delete-room-btn"
+                                        data-id="<?= $room['id'] ?>"
+                                        data-room="<?= $room['room_number'] ?>"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#deleteRoomModal">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
                                 </td>
                             </tr>
                         <?php
@@ -173,31 +194,127 @@
         </div>
     </div>
 
+    <div class="modal fade" id="editRoomModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content p-3">
+                <div class="modal-header">
+                    <h5 class="modal-title text-maroon fw-semibold">
+                        <i class="bi bi-pencil-square"></i> Edit Room
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <form method="POST" action="../includes/processes.php">
+                    <input type="hidden" name="room_id" id="edit_room_id">
+
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">Room Number</label>
+                            <input type="text" class="form-control" name="room_number" id="edit_room_number" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Capacity</label>
+                            <input type="number" class="form-control" name="capacity" id="edit_capacity" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Status</label>
+                            <select class="form-select" name="status" id="edit_status">
+                                <option value="Available">Available</option>
+                                <option value="Full">Full</option>
+                                <option value="Under Maintenance">Under Maintenance</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button class="btn btn-outline-maroon" data-bs-dismiss="modal">Cancel</button>
+                        <button class="btn btn-gold" name="updateRoom" type="submit">Update</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="deleteRoomModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content p-3">
+                <div class="modal-header">
+                    <h5 class="modal-title text-danger fw-semibold">
+                        <i class="bi bi-exclamation-triangle"></i> Delete Room
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <form method="POST" action="../includes/processes.php">
+                    <input type="hidden" name="room_id" id="delete_room_id">
+
+                    <div class="modal-body">
+                        <p>
+                            Are you sure you want to delete room
+                            <strong id="delete_room_number"></strong>?
+                        </p>
+                        <p class="text-muted small">
+                            All room assignments will be removed.
+                        </p>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button class="btn btn-danger" name="deleteRoom" type="submit">Delete</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 
     <script>
-        // Select all checkboxes at once
-        document.addEventListener("DOMContentLoaded", function() {
-            const selectAll = document.getElementById("selectAll");
-            if (selectAll) {
-                selectAll.addEventListener("change", function() {
-                    const checkboxes = document.querySelectorAll('input[name="students[]"]');
-                    checkboxes.forEach(cb => cb.checked = selectAll.checked);
-                });
-            }
+        // Edit Room Modal Population
+        document.addEventListener('click', function(e) {
+            const btn = e.target.closest('.edit-room-btn');
+            if (!btn) return;
+
+            document.getElementById('edit_room_id').value = btn.dataset.id;
+            document.getElementById('edit_room_number').value = btn.dataset.room;
+            document.getElementById('edit_capacity').value = btn.dataset.capacity;
+            document.getElementById('edit_status').value = btn.dataset.status;
         });
 
-        // Populate View Room Modal with data
+        // Delete Room Modal Population
+        document.addEventListener('click', function(e) {
+            const btn = e.target.closest('.delete-room-btn');
+            if (!btn) return;
+
+            document.getElementById('delete_room_id').value = btn.dataset.id;
+            document.getElementById('delete_room_number').textContent = btn.dataset.room;
+        });
+
+
         document.getElementById('viewRoomModal').addEventListener('show.bs.modal', function(event) {
             const button = event.relatedTarget;
 
             const room = button.getAttribute('data-room');
+            const capacity = parseInt(button.getAttribute('data-capacity'));
+            const occupied = parseInt(button.getAttribute('data-occupied'));
 
             document.getElementById('room_number').textContent = room;
 
-            const assBtn = document.getElementById('assignModalBtn');
-            assBtn.setAttribute('data-room', room);
+            const assignBtn = document.getElementById('assignModalBtn');
+            assignBtn.setAttribute('data-room', room);
 
-            // Fetch occupants via AJAX
+            // 🚫 Disable assign if full
+            if (occupied >= capacity) {
+                assignBtn.disabled = true;
+                assignBtn.classList.add('disabled');
+                assignBtn.innerHTML = `<i class="bi bi-lock"></i> Room Full`;
+            } else {
+                assignBtn.disabled = false;
+                assignBtn.classList.remove('disabled');
+                assignBtn.innerHTML = `<i class="bi bi-person-plus"></i> Assign Student`;
+            }
+
+            // Load occupants
             fetch(`includes/get_assigned_students.php?room_number=${room}`)
                 .then(res => res.text())
                 .then(html => {
@@ -205,31 +322,45 @@
                 });
         });
 
+        document.getElementById('occupants').addEventListener('click', function(e) {
+            const btn = e.target.closest('.remove-assignment');
+            if (!btn) return;
+
+            const studentId = btn.dataset.student;
+            const roomNumber = btn.dataset.room;
+
+            fetch(`includes/remove_assignment.php?student_id=${studentId}&room_number=${roomNumber}`)
+                .then(() => {
+                    fetch(`includes/get_assigned_students.php?room_number=${roomNumber}`)
+                        .then(res => res.text())
+                        .then(html => {
+                            document.getElementById('occupants').innerHTML = html;
+                        });
+                });
+        });
+
         document.getElementById('assignModal').addEventListener('show.bs.modal', function(event) {
             const button = event.relatedTarget;
-
             const room = button.getAttribute('data-room');
 
-            const modalTitle = this.querySelector('.modal-title');
-            modalTitle.textContent = `Assign Student to Room ${room}`;
-
+            this.querySelector('.modal-title').textContent = `Assign Student to Room ${room}`;
             document.getElementById('assign_room_id').value = room;
 
-            // Fetch unassigned students via AJAX
             fetch(`includes/get_unassigned_students.php?room_id=${room}`)
                 .then(res => res.text())
                 .then(html => {
                     document.getElementById('assignModalBody').innerHTML = html;
                 });
 
-            // Re-attach "select all" behavior
-            const selectAll = document.getElementById("selectAll");
+            const selectAll = document.getElementById('selectAll');
             selectAll.checked = false;
-            selectAll.addEventListener("change", function() {
-                const checkboxes = document.querySelectorAll('#assignModalBody input[type="checkbox"]');
-                checkboxes.forEach(cb => cb.checked = selectAll.checked);
-            });
+            selectAll.onchange = function() {
+                document
+                    .querySelectorAll('#assignModalBody input[type="checkbox"]')
+                    .forEach(cb => cb.checked = this.checked);
+            };
         });
     </script>
+
 
     <?php include 'includes/footer.php'; ?>
