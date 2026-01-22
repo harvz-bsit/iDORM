@@ -127,20 +127,20 @@ include 'includes/header.php';
                     </form>
                     <hr class="my-4">
                     <form action="../includes/processes.php" method="POST">
-                        <div class="row g-3">
+                        <div class="row g-3" id="change_password">
                             <h5 class="fw-bold text-green mb-3">🔑 Change Password</h5>
                             <input type="hidden" name="student_id" value="<?= $_SESSION['student_id']; ?>">
                             <div class="col-md-12">
                                 <label class="form-label fw-semibold">Current Password</label>
-                                <input type="text" name="current_password" class="form-control" required>
+                                <input type="password" name="current_password" class="form-control" required>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label fw-semibold">New Password</label>
-                                <input type="text" name="new_password" class="form-control" required>
+                                <input type="password" name="new_password" class="form-control" required>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label fw-semibold">Confirm New Password</label>
-                                <input type="text" name="confirm_password" class="form-control" required>
+                                <input type="password" name="confirm_password" class="form-control" required>
                             </div>
                             <div class="text-end mt-4">
                                 <button type="submit" name="updatePassword" class="btn btn-gold px-4 fw-semibold">Update Password</button>

@@ -24,14 +24,14 @@ $approval_row = mysqli_fetch_assoc($approval_result);
         // Get latest approved receipt
         $latestReceiptQuery = "SELECT * FROM payment_receipts 
                                WHERE student_id = '$student_id' AND status='Approved'
-                               ORDER BY paid_at DESC 
+                               ORDER BY month_paid DESC 
                                LIMIT 1";
         $latestReceiptResult = mysqli_query($conn, $latestReceiptQuery);
         $latestReceipt = mysqli_fetch_assoc($latestReceiptResult);
 
         if ($latestReceipt) {
-            $lastPaidDate = new DateTime($latestReceipt['paid_at']);
-            $nextDueDate = $lastPaidDate->modify('+1 month')->format('F j, Y');
+            $lastPaidDate = new DateTime($latestReceipt['month_paid']);
+            $nextDueDate = $lastPaidDate->modify('+1 month')->format('F Y');
             $nextDueBadge = 'Upcoming';
         } else {
             $nextDueDate = 'Payment not recorded';
@@ -49,11 +49,11 @@ $approval_row = mysqli_fetch_assoc($approval_result);
                 <div class="card shadow-sm border-0 text-center p-4">
                     <h6 class="text-uppercase text-muted mb-2">Last Paid</h6>
                     <h4 class="fw-bold text-green">
-                        <?php echo $latestReceipt ? date('F Y', strtotime($latestReceipt['paid_at'])) : 'N/A'; ?>
+                        <?php echo $latestReceipt ? date('F Y', strtotime($latestReceipt['month_paid'])) : 'N/A'; ?>
                     </h4>
                     <span class="badge 
                         <?php echo $latestReceipt ? 'bg-success' : 'bg-warning text-dark'; ?>">
-                        <?php echo $latestReceipt ? 'Paid' : 'Pending'; ?>
+                        <?php echo $latestReceipt ? 'Paid' : 'Pending'; ?> (<?php echo date('F j, Y', strtotime($latestReceipt['paid_at'])) ?? 'N/A'; ?>)
                     </span>
                 </div>
             </div>
@@ -104,7 +104,7 @@ $approval_row = mysqli_fetch_assoc($approval_result);
                             <?php if (mysqli_num_rows($allReceiptsResult) > 0): ?>
                                 <?php while ($receipt = mysqli_fetch_assoc($allReceiptsResult)): ?>
                                     <tr>
-                                        <td><?php echo date('F Y', strtotime($receipt['paid_at'])); ?></td>
+                                        <td><?php echo date('F Y', strtotime($receipt['month_paid'])); ?></td>
                                         <td>₱<?php echo number_format($receipt['amount'], 2); ?></td>
                                         <td><?php echo date('F j, Y', strtotime($receipt['paid_at'])); ?></td>
                                         <td>

@@ -55,12 +55,26 @@ $announcementsResult = mysqli_query($conn, $announcementsQuery);
 
     <?php
     // ======= CONDITIONAL DISPLAY =======
+    $check_password = "SELECT password FROM users WHERE student_id = '$student_id' LIMIT 1";
+    $password_result = mysqli_query($conn, $check_password);
+    $password_row = mysqli_fetch_assoc($password_result);
+    if ($password_row && password_verify('password123', $password_row['password'])) {
+    ?>
+        <div class="alert alert-warning d-flex align-items-center" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            <div>
+                <strong>Important:</strong> For your account security, please change your default password.
+                <a href="profile.php#change_password" class="alert-link">Change Password Now</a>.
+            </div>
+        </div>
+        <?php
+    }
     if ($approval_row && $approval_row['status'] === 'Approved') {
         if (!$contract_row || $contract_row['status'] !== 'Signed') {
             include 'sign_contract.php';
         } else {
             // ======= SHOW MAIN DASHBOARD =======
-    ?>
+        ?>
             <div class="row g-4">
                 <div class="col-md-4">
                     <div class="card dashboard-card text-center p-4 shadow-lg">
@@ -82,8 +96,8 @@ $announcementsResult = mysqli_query($conn, $announcementsQuery);
                                 <span class="badge bg-danger px-3 py-2">Unpaid</span>
                             <?php endif; ?>
                         </p>
-                        <small class="text-muted">
-                            (<?= $payment['month_paid'] ?? 'No record'; ?>)
+                        <small class="text-muted m-0">
+                            <?= $payment ? date('F Y', strtotime($payment['month_paid'])) : 'No record'; ?>
                         </small>
 
                     </div>
@@ -93,7 +107,9 @@ $announcementsResult = mysqli_query($conn, $announcementsQuery);
                     <div class="card dashboard-card text-center p-4 shadow-lg">
                         <h5>📅 Next Due</h5>
                         <p class="fw-semibold mb-0">
-                            <?= $payment ? date('F d, Y', strtotime($payment['month_paid'])) : '—'; ?>
+                            <?= //+1 
+                            $payment ? date_modify(new DateTime($payment['month_paid']), '+1 month')->format('F Y') : '—';
+                            ?>
                         </p>
                         <small class="text-muted">Mark your calendar</small>
                     </div>
@@ -120,13 +136,23 @@ $announcementsResult = mysqli_query($conn, $announcementsQuery);
                             </div>
 
                             <ul class="list-group list-group-flush">
-                                <?php while ($announcement = mysqli_fetch_assoc($announcementsResult)) : ?>
+                                <?php
+                                if (mysqli_num_rows($announcementsResult) === 0):
+                                ?>
                                     <li class="list-group-item bg-white border-start border-4 border-warning py-3">
-                                        <h6 class="fw-semibold mb-1 text-dark"><?php echo htmlspecialchars($announcement['title']); ?></h6>
-                                        <p class="mb-1 text-muted"><?php echo htmlspecialchars($announcement['description']); ?></p>
-                                        <small class="text-muted">📅 Posted on <?php echo date('F d, Y', strtotime($announcement['date_posted'])); ?></small>
+                                        <h6 class="fw-semibold mb-1 text-dark">No announcements available</h6>
+                                        <p class="mb-1 text-muted">There are no recent announcements.</p>
                                     </li>
-                                <?php endwhile; ?>
+                                    <?php
+                                else:
+                                    while ($announcement = mysqli_fetch_assoc($announcementsResult)) : ?>
+                                        <li class="list-group-item bg-white border-start border-4 border-warning py-3">
+                                            <h6 class="fw-semibold mb-1 text-dark"><?php echo htmlspecialchars($announcement['title']); ?></h6>
+                                            <p class="mb-1 text-muted"><?php echo htmlspecialchars($announcement['description']); ?></p>
+                                            <small class="text-muted">📅 Posted on <?php echo date('F d, Y', strtotime($announcement['date_posted'])); ?></small>
+                                        </li>
+                                <?php endwhile;
+                                endif; ?>
                             </ul>
                         </div>
                     </div>
@@ -147,7 +173,6 @@ $announcementsResult = mysqli_query($conn, $announcementsQuery);
                                             <th>Return</th>
                                             <th>Destination</th>
                                             <th>Status</th>
-                                            <th>Action</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -183,19 +208,6 @@ $announcementsResult = mysqli_query($conn, $announcementsQuery);
                                                         <?php else: ?>
                                                             <span class="badge bg-danger">Rejected</span>
                                                         <?php endif; ?>
-                                                    </td>
-                                                    <td>
-                                                        <?php if ($p['status'] === 'Approved'): ?>
-                                                            <a href="print_passlip.php?id=<?= $p['id']; ?>"
-                                                                class="btn btn-sm btn-outline-primary">
-                                                                📄 Download PDF
-                                                            </a>
-                                                        <?php else: ?>
-                                                            <button class="btn btn-sm btn-outline-secondary" disabled>
-                                                                📄 Download PDF
-                                                            </button>
-                                                        <?php endif; ?>
-
                                                     </td>
                                                 </tr>
                                         <?php endwhile;

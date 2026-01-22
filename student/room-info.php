@@ -84,6 +84,19 @@ include 'includes/header.php';
 
             <!-- RIGHT COLUMN (Scrollable content: Maintenance + Complaints) -->
             <div class="col-lg-8">
+                <!-- Rules and Regulations -->
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-body">
+                        <h5 class="text-maroon fw-bold mb-3">📜 Dormitory Rules and Regulations</h5>
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item">1. Maintain cleanliness in your room and common areas.</li>
+                            <li class="list-group-item">2. No loud noises after 10 PM to ensure a peaceful environment.</li>
+                            <li class="list-group-item">3. Visitors are not allowed in the dormitory rooms.</li>
+                            <li class="list-group-item">4. Report any mainte nance issues promptly to the administration.</li>
+                            <li class="list-group-item">5. Follow the dormitory's security protocols at all times.</li>
+                        </ul>
+                    </div>
+                </div>
                 <!-- Maintenance Request -->
                 <div class="card border-0 shadow-sm mb-4">
                     <div class="card-body">

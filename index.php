@@ -14,7 +14,7 @@ if (isset($_SESSION['student_id'])) {
         <img src="assets/img/logo.png" alt="IDORM Logo" class="mb-3" height="100">
         <h1 class="fw-bold display-4 text-gold">Welcome to IDORM</h1>
         <p class="lead text-white">Your home inside Ilocos Sur Polytechnic State College – Main Campus</p>
-        <a href="#rooms" class="btn btn-gold mt-3 px-4 py-2 fw-semibold">Explore Rooms</a>
+        <a href="apply.php" class="btn btn-gold mt-3 px-4 py-2 fw-semibold">Apply Now</a>
     </div>
 </section>
 

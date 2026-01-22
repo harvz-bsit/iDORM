@@ -1,5 +1,10 @@
 <?php
+require '../vendor/autoload.php';
 include '../config/conn.php';
+
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+
 
 // Login Using Student ID and Password (Hashed)
 if (isset($_POST['login'])) {
@@ -517,21 +522,277 @@ if (isset($_POST['resolve_complaint'])) {
 // Passlip Requests
 if (isset($_POST['approve_passlip'])) {
     $id = $_POST['passlip_id'];
-    $stmt = $conn->prepare("UPDATE passlips SET status='Approved' WHERE id=?");
-    $stmt->bind_param("i", $id);
+
+    // Generate secure verification code & expiry
+    $code = bin2hex(random_bytes(16));
+    $expires = date('Y-m-d H:i:s', strtotime('+1 day'));
+
+    // Update DB
+    $stmt = $conn->prepare("
+        UPDATE passlips 
+        SET status='Approved',
+            verification_code=?,
+            expires_at=?,
+            used=0
+        WHERE id=?");
+    $stmt->bind_param("ssi", $code, $expires, $id);
     $stmt->execute();
+
+    // Fetch user + pass slip details
+    $emailQuery = $conn->prepare("
+        SELECT 
+            u.email,
+            upi.full_name,
+            p.departure_date,
+            p.departure_time,
+            p.destination,
+            p.purpose,
+            p.return_date,
+            p.return_time,
+            p.verification_code
+        FROM users u
+        JOIN user_personal_information upi ON u.student_id = upi.student_id
+        JOIN passlips p ON u.student_id = p.student_id
+        WHERE p.id = ?");
+    $emailQuery->bind_param("i", $id);
+    $emailQuery->execute();
+    $userData = $emailQuery->get_result()->fetch_assoc();
+
+    // ENV
+    $isLocal = ($_SERVER['HTTP_HOST'] === 'localhost');
+    $baseUrl = $isLocal
+        ? "https://your-ngrok-link.ngrok-free.app"
+        : "https://idorm.ispsc.edu.ph";
+
+    $verifyUrl = $baseUrl . "/verify_passlip.php?code=" . $userData['verification_code'];
+
+    // SEND EMAIL
+    $mail = new PHPMailer(true);
+    try {
+        $mail->isSMTP();
+        $mail->Host = 'smtp.gmail.com';
+        $mail->SMTPAuth = true;
+        $mail->Username = 'idormsystem@gmail.com';
+        $mail->Password = 'yyoyfrqcybomxhkj';
+        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+        $mail->Port = 587;
+
+        $mail->setFrom('idormsystem@gmail.com', 'IDORM System');
+        $mail->addAddress($userData['email']);
+        $mail->isHTML(true);
+        $mail->Subject = 'Official Pass Slip – Approved';
+
+        // Embed logo
+        $mail->addEmbeddedImage('../assets/img/circle-logo.png', 'idormlogo');
+
+        $mail->Body = "
+<!DOCTYPE html>
+<html>
+<body style='margin:0;padding:0;background:#f4f6f9;font-family:Arial,sans-serif;'>
+<table width='100%' style='background:#f4f6f9;padding:20px;'>
+<tr><td align='center'>
+<table width='600' style='background:#ffffff;border-radius:8px;overflow:hidden;'>
+
+<tr>
+<td style='padding:20px; border-bottom:1px solid #eee;'>
+<table width='100%'><tr>
+<td width='60'>
+<img src='cid:idormlogo' width='50' alt='IDORM Logo'>
+</td>
+<td>
+<h2 style='margin:0;'>IDORM System</h2>
+<p style='margin:0; font-size:12px; color:#888;'>Ilocos Sur Polytechnic State College</p>
+</td>
+</tr></table>
+</td>
+</tr>
+
+<tr>
+<td style='padding:30px;'>
+<h3>Hello {$userData['full_name']},</h3>
+
+<p style='font-size:14px;'>
+Your <b>Pass Slip Request</b> has been:</p>
+
+<p style='font-size:18px; color:#16a34a; font-weight:bold;'>APPROVED</p>
+<p style='font-size:13px; color:#555;'>Approved by Dorm Manager via IDORM System.</p>
+
+<hr>
+
+<h4>Pass Slip Details</h4>
+<table width='100%' cellpadding='6' cellspacing='0' style='border-collapse:collapse;font-size:14px;'>
+<tr><td><b>Departure Date</b></td><td>{$userData['departure_date']}</td></tr>
+<tr><td><b>Departure Time</b></td><td>{$userData['departure_time']}</td></tr>
+<tr><td><b>Destination</b></td><td>{$userData['destination']}</td></tr>
+<tr><td><b>Purpose</b></td><td>{$userData['purpose']}</td></tr>
+<tr><td><b>Return Date</b></td><td>{$userData['return_date']}</td></tr>
+<tr><td><b>Return Time</b></td><td>{$userData['return_time']}</td></tr>
+</table>
+
+<p style='margin-top:20px;font-size:13px;color:#555;'>
+Please present this email to the <b>Dormitory Guard</b> upon exit and re-entry.
+</p>
+
+<p style='margin-top:20px; margin-bottom:20px;'>You can also verify this pass slip online:<br>
+<a href='{$verifyUrl}'><button style='background:#16a34a;color:white;border:none;padding:8px 16px;border-radius:4px;text-decoration:none;'>Verify Pass Slip</button></a></p>
+
+<p style='margin-top:20px;'>Best regards,<br><b>IDORM System</b></p>
+</td>
+</tr>
+
+<tr>
+<td style='background:#f9fafb; padding:20px; text-align:center; font-size:12px; color:#777;'>
+<p>© " . date('Y') . " IDORM System | Ilocos Sur Polytechnic State College</p>
+<p>Vigan City, Ilocos Sur</p>
+<p style='font-size:11px;color:#aaa;'>This is an automated email. Please do not reply.</p>
+</td>
+</tr>
+
+</table>
+</td></tr>
+</table>
+</body>
+</html>";
+
+        $mail->send();
+    } catch (Exception $e) {
+        // Log error
+        echo "<script>console.error('Mailer Error: " . $mail->ErrorInfo . "');</script>";
+        exit;
+    }
+
     header("Location: ../admin/requests.php");
     exit;
 }
 
+
 if (isset($_POST['reject_passlip'])) {
     $id = $_POST['passlip_id'];
+
+    // Update status in DB
     $stmt = $conn->prepare("UPDATE passlips SET status='Rejected' WHERE id=?");
     $stmt->bind_param("i", $id);
     $stmt->execute();
+
+    // Fetch user + pass slip details
+    $emailQuery = $conn->prepare("
+        SELECT 
+            u.email,
+            upi.full_name,
+            p.departure_date,
+            p.departure_time,
+            p.destination,
+            p.purpose,
+            p.return_date,
+            p.return_time
+        FROM users u
+        JOIN user_personal_information upi ON u.student_id = upi.student_id
+        JOIN passlips p ON u.student_id = p.student_id
+        WHERE p.id = ?");
+    $emailQuery->bind_param("i", $id);
+    $emailQuery->execute();
+    $userData = $emailQuery->get_result()->fetch_assoc();
+
+    // ENV
+    $isLocal = ($_SERVER['HTTP_HOST'] === 'localhost');
+    $baseUrl = $isLocal
+        ? "https://your-ngrok-link.ngrok-free.app"
+        : "https://idorm.ispsc.edu.ph";
+
+    // SEND EMAIL
+    $mail = new PHPMailer(true);
+    try {
+        $mail->isSMTP();
+        $mail->Host = 'smtp.gmail.com';
+        $mail->SMTPAuth = true;
+        $mail->Username = 'idormsystem@gmail.com';
+        $mail->Password = 'yyoyfrqcybomxhkj';
+        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+        $mail->Port = 587;
+
+        $mail->setFrom('idormsystem@gmail.com', 'IDORM System');
+        $mail->addAddress($userData['email']);
+        $mail->isHTML(true);
+        $mail->Subject = 'Official Pass Slip – Rejected';
+
+        // Optional: embed logo
+        $mail->addEmbeddedImage('../assets/img/circle-logo.png', 'idormlogo');
+
+        $mail->Body = "
+<!DOCTYPE html>
+<html>
+<body style='margin:0;padding:0;background:#f4f6f9;font-family:Arial,sans-serif;'>
+<table width='100%' style='background:#f4f6f9;padding:20px;'>
+<tr><td align='center'>
+<table width='600' style='background:#ffffff;border-radius:8px;overflow:hidden;'>
+
+<tr>
+<td style='padding:20px; border-bottom:1px solid #eee;'>
+<table width='100%'><tr>
+<td width='60'>
+<img src='cid:idormlogo' width='50' alt='IDORM Logo'>
+</td>
+<td>
+<h2 style='margin:0;'>IDORM System</h2>
+<p style='margin:0; font-size:12px; color:#888;'>Ilocos Sur Polytechnic State College</p>
+</td>
+</tr></table>
+</td>
+</tr>
+
+<tr>
+<td style='padding:30px;'>
+<h3>Hello {$userData['full_name']},</h3>
+
+<p style='font-size:14px;'>
+Your <b>Pass Slip Request</b> has been:</p>
+
+<p style='font-size:18px; color:#dc2626; font-weight:bold;'>REJECTED</p>
+<p style='font-size:13px; color:#555;'>Processed by Dorm Manager via IDORM System.</p>
+
+<hr>
+
+<h4>Pass Slip Details</h4>
+<table width='100%' cellpadding='6' cellspacing='0' style='border-collapse:collapse;font-size:14px;'>
+<tr><td><b>Departure Date</b></td><td>{$userData['departure_date']}</td></tr>
+<tr><td><b>Departure Time</b></td><td>{$userData['departure_time']}</td></tr>
+<tr><td><b>Destination</b></td><td>{$userData['destination']}</td></tr>
+<tr><td><b>Purpose</b></td><td>{$userData['purpose']}</td></tr>
+<tr><td><b>Return Date</b></td><td>{$userData['return_date']}</td></tr>
+<tr><td><b>Return Time</b></td><td>{$userData['return_time']}</td></tr>
+</table>
+
+<p style='margin-top:20px;font-size:13px;color:#555;'>
+Please contact the <b>Dormitory Office</b> for clarification regarding your pass slip request.
+</p>
+
+<p style='margin-top:20px;'>Best regards,<br><b>IDORM System</b></p>
+</td>
+</tr>
+
+<tr>
+<td style='background:#f9fafb; padding:20px; text-align:center; font-size:12px; color:#777;'>
+<p>© " . date('Y') . " IDORM System | Ilocos Sur Polytechnic State College</p>
+<p>Vigan City, Ilocos Sur</p>
+<p style='font-size:11px;color:#aaa;'>This is an automated email. Please do not reply.</p>
+</td>
+</tr>
+
+</table>
+</td></tr>
+</table>
+</body>
+</html>";
+
+        $mail->send();
+    } catch (Exception $e) {
+        // Log error if needed
+    }
+
     header("Location: ../admin/requests.php");
     exit;
 }
+
 
 if (isset($_POST['add_announcement'])) {
 

@@ -165,6 +165,12 @@ if (!$contract) {
             Date Signed: <?= date('F d, Y', strtotime($contract['signed_at'])) ?></p>
     </div>
 
+    <!-- Approved via IDorm System with system logo -->
+    <div class="text-end mt-4">
+        <img src="../assets/img/circle-logo.png" alt="iDORM Logo" height="30">
+        <small class="text-muted">Approved via iDORM System</small>
+    </div>
+
 </div>
 
 <?php include 'includes/footer.php'; ?>
