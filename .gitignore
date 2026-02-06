@@ -1,0 +1,27 @@
+# Composer dependencies
+/vendor/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs and databases
+*.log
+*.sqlite
+*.db
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# IDE files
+.idea/
+.vscode/
+
+# Node modules (if any frontend tooling)
+node_modules/
+
+# Temporary files
+*.tmp
+*.swp

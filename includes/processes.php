@@ -5,6 +5,8 @@ include '../config/conn.php';
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
+use Dompdf\Dompdf;
+
 
 // Login Using Student ID and Password (Hashed)
 if (isset($_POST['login'])) {
@@ -874,5 +876,166 @@ if (isset($_POST['delete_announcement'])) {
     }
 
     $stmt->close();
+    exit;
+}
+
+$action = $_GET['action'] ?? '';
+
+/* ---------------- PREVIEW ---------------- */
+if ($action === 'preview_report') {
+    $data = json_decode(file_get_contents("php://input"), true);
+    $type = $data['type'];
+    $status = $data['status'];
+    $month = $data['month'];
+
+    $query = buildReportQuery($type, $status, $month, false);
+    $result = mysqli_query($conn, $query);
+
+    $rows = [];
+    while ($row = mysqli_fetch_assoc($result)) {
+        $rows[] = $row;
+    }
+
+    echo json_encode($rows);
+    exit;
+}
+
+/* ---------------- DOWNLOAD ---------------- */
+if ($action === 'download_report') {
+    $type = $_GET['type'];
+    $status = $_GET['status'];
+    $month = $_GET['month'];
+    $format = $_GET['format'];
+
+    $query = buildReportQuery($type, $status, $month, true);
+    $result = mysqli_query($conn, $query);
+
+    if ($format === 'csv') {
+        header('Content-Type: text/csv');
+        header("Content-Disposition: attachment; filename={$type}_report.csv");
+        $out = fopen("php://output", "w");
+
+        $first = mysqli_fetch_assoc($result);
+        fputcsv($out, array_keys($first));
+        fputcsv($out, $first);
+
+        while ($row = mysqli_fetch_assoc($result)) {
+            fputcsv($out, $row);
+        }
+        fclose($out);
+        exit;
+    }
+
+    if ($format === 'pdf') {
+        $html = "<h2 style='text-align:center;'>" . ucfirst($type) . " Report</h2><table border='1' width='100%'><tr>";
+        $first = mysqli_fetch_assoc($result);
+        foreach (array_keys($first) as $h) {
+            $html .= "<th>$h</th>";
+        }
+        $html .= "</tr><tr>";
+        foreach ($first as $v) $html .= "<td>$v</td>";
+        $html .= "</tr>";
+
+        while ($row = mysqli_fetch_assoc($result)) {
+            $html .= "<tr>";
+            foreach ($row as $v) $html .= "<td>$v</td>";
+            $html .= "</tr>";
+        }
+        $html .= "</table>";
+
+        $dompdf = new Dompdf();
+        $dompdf->loadHtml($html);
+        $dompdf->setPaper('A4', 'landscape');
+        $dompdf->render();
+        $dompdf->stream("{$type}_report.pdf", ["Attachment" => true]);
+        exit;
+    }
+}
+
+/* ---------------- QUERY BUILDER ---------------- */
+function buildReportQuery($type, $status, $month, $forDownload)
+{
+    switch ($type) {
+        case 'students':
+            return "SELECT student_id, full_name, address, contact FROM user_personal_information";
+
+        case 'payments':
+            $q = "SELECT student_id, month_paid, status FROM payment_receipts WHERE 1";
+            if ($status) $q .= " AND status='$status'";
+            if ($month) $q .= " AND month_paid LIKE '%$month%'";
+            return $q;
+
+        case 'passlips':
+            $q = "SELECT student_id, destination, purpose, departure_date, return_date, status FROM passlips WHERE 1";
+            if ($status) $q .= " AND status='$status'";
+            return $q;
+
+        case 'rooms':
+            return "SELECT room_number, capacity, current_occupants FROM rooms";
+
+        case 'contracts':
+            $q = "SELECT student_id, status, signed_at FROM contracts WHERE 1";
+            if ($status) $q .= " AND status='$status'";
+            return $q;
+
+        case 'applications':
+            $q = "SELECT student_id, status, date_updated FROM application_approvals WHERE 1";
+            if ($status) $q .= " AND status='$status'";
+            return $q;
+    };
+};
+
+// ================= INVENTORY =================
+if ($action === 'add_inventory') {
+    $item_name = $_POST['item_name'];
+    $category  = $_POST['category'];
+    $quantity  = $_POST['quantity'];
+    $status    = $_POST['status'];
+    $location  = $_POST['location'];
+    $remarks   = $_POST['remarks'];
+
+    mysqli_query($conn, "
+        INSERT INTO inventory 
+        (item_name, category, quantity, status, location, remarks)
+        VALUES 
+        ('$item_name','$category','$quantity','$status','$location','$remarks')
+    ");
+
+    echo json_encode(['status' => 'success']);
+    exit;
+}
+
+// ================= UPDATE INVENTORY =================
+if ($action === 'update_inventory') {
+    $id        = $_POST['id'];
+    $item_name = $_POST['item_name'];
+    $category  = $_POST['category'];
+    $quantity  = $_POST['quantity'];
+    $status    = $_POST['status'];
+    $location  = $_POST['location'];
+    $remarks   = $_POST['remarks'];
+
+    mysqli_query($conn, "
+        UPDATE inventory SET
+            item_name = '$item_name',
+            category  = '$category',
+            quantity  = '$quantity',
+            status    = '$status',
+            location  = '$location',
+            remarks   = '$remarks'
+        WHERE id = '$id'
+    ");
+
+    echo json_encode(['status' => 'success']);
+    exit;
+}
+
+
+if ($action === 'delete_inventory') {
+    $data = json_decode(file_get_contents("php://input"), true);
+    $id = $data['id'];
+
+    mysqli_query($conn, "DELETE FROM inventory WHERE id = '$id'");
+    echo json_encode(['status' => 'success']);
     exit;
 }

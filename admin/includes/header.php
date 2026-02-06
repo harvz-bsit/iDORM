@@ -177,6 +177,7 @@ if (!isset($_SESSION['admin']) || $_SESSION['admin'] !== '00000') {
                             <li><a class="dropdown-item" href="payments.php">Payments</a></li>
                             <li><a class="dropdown-item" href="requests.php">Requests</a></li>
                             <li><a class="dropdown-item" href="announcements.php">Announcements</a></li>
+                            <li><a class="dropdown-item" href="inventory.php">Inventory</a></li>
                         </ul>
                     </li>
                     <li class="nav-item"><a class="nav-link" href="reports.php">Reports</a></li>

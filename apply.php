@@ -4,6 +4,10 @@ if (isset($_SESSION['student_id'])) {
     header("Location: student/dashboard.php");
     exit;
 }
+
+// SweetAlert messages
+$success = $_GET['success'] ?? null;
+$error = $_GET['error'] ?? null;
 ?>
 
 <!DOCTYPE html>
@@ -16,6 +20,7 @@ if (isset($_SESSION['student_id'])) {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     <link rel="icon" type="image/png" href="assets/img/circle-logo.png">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <style>
         :root {
@@ -572,6 +577,38 @@ if (isset($_SESSION['student_id'])) {
                         </div>
                     </div>
 
+
+                    <h5 class="text-light mb-3">Rules and Regulations</h5>
+
+                    <div class="col-md-12 text-light mb-3">
+                        <ol>
+                            <li>No loitering in other rooms.</li>
+                            <li>No one should be eating in the kitchen after 9 PM (Except dagitay adda duty na po ah working students)</li>
+                            <li>Clean the table after eating.</li>
+                            <li>Dispose your own garbage.</li>
+                            <li>Remove your bed curtains when leaving (kung may kurtina sa bed).</li>
+                            <li>Meats should be in Tupperware.</li>
+                            <li>Always clean your respective areas.</li>
+                            <li>Minimize voise around especially around 10:00 PM onward</li>
+                            <li>Washing Plates in Cr is not allowed (if adda makita u report agad)</li>
+                            <li>Sweeping your trash into another room is not allowed( if adda makita u report agad)</li>
+                            <li>Keep your Rooms Clean</li>
+                            <li>Every rooms must have cleaning materials</li>
+                            <li>Proper Hygiene</li>
+                            <li>Electric Instant Cooker is not allowed</li>
+                            <li>The Fire exit is not a tambayan area. Dorm from the fire exit should be locked before 9: 30pm</li>
+                            <li>No residents is allowed to enter the other rooms without the permission of the room members.</li>
+                            <li>Taking a bath together are strictly not allowed, unless pinanganak kayong magkadikit.</li>
+                            <li>WAG MAGNAKAW</li>
+                        </ol>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="" id="confirmRules" required>
+                            <label class="form-check-label" for="confirmRules">
+                                I read and understood the above rules and regulations, and I agree to abide by them during my stay in the dormitory. I acknowledge that failure to comply with these rules may result in disciplinary action, including possible eviction from the dormitory.
+                            </label>
+                        </div>
+                    </div>
+
                     <div class="col-md-12 mt-3 text-end">
                         <button type="button" class="btn btn-nav prev">← Back</button>
                         <button type="submit" name="submit" class="btn btn-apply px-4 py-2">Submit Application</button>
@@ -728,7 +765,33 @@ if (isset($_SESSION['student_id'])) {
             yesRadio.addEventListener('change', updateVisibility);
         })();
     </script>
+    <!-- SWEETALERT HANDLER -->
+    <?php if ($success): ?>
+        <script>
+            Swal.fire({
+                icon: 'success',
+                title: 'Application Submitted!',
+                text: <?= json_encode($success) ?>,
+                confirmButtonColor: '#e3b23c'
+            }).then(() => {
+                // clean URL so it won't reappear on refresh
+                window.history.replaceState({}, document.title, "apply.php");
+            });
+        </script>
+    <?php endif; ?>
 
+    <?php if ($error): ?>
+        <script>
+            Swal.fire({
+                icon: 'error',
+                title: 'Submission Failed',
+                text: <?= json_encode($error) ?>,
+                confirmButtonColor: '#7a1e1e'
+            }).then(() => {
+                window.history.replaceState({}, document.title, "apply.php");
+            });
+        </script>
+    <?php endif; ?>
 </body>
 
 </html>
