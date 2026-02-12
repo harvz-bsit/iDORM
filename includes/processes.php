@@ -131,6 +131,14 @@ if (isset($_POST['submit'])) {
     // Default Password
     $default_password = password_hash('password123', PASSWORD_BCRYPT);
 
+    // Check if student id and email already exists
+    $checkSql = "SELECT * FROM users WHERE student_id='$student_id' OR email='$email'";
+    $checkResult = mysqli_query($conn, $checkSql);
+    if (mysqli_num_rows($checkResult) > 0) {
+        header("Location: ../apply.php?error=Student ID or Email already exists.");
+        exit();
+    }
+
     // Create User Based on Student ID
     $sql = "INSERT INTO users (student_id, password, email) VALUES ('$student_id', '$default_password', '$email')";
     $result = mysqli_query($conn, $sql);
@@ -153,8 +161,8 @@ if (isset($_POST['submit'])) {
                  VALUES ('$student_id', '$height', '$weight', '$blood_type', '$allergies', '$conditions', '$illness_history', '$current_medication', '$communicable', '$communicable_name', '$communicable_medication', '$mental_health', '$mental_health_name', '$mental_health_medication', '$physical', '$physical_name', '$last_med_checkup', '$physical_medication', '$menstrual_cycle', '$reproductive_issue', '$reproductive_specify', '$reproductive_medication', '$last_checkup', '$due_date', '$physician_name', '$physician_contact')";
         $result5 = mysqli_query($conn, $sql5);
 
-        $sql6 = "INSERT INTO application_approvals (student_id, application_date, status, remarks) 
-                 VALUES ('$student_id', NOW(), 'Pending', 'Your application is under review.')";
+        $sql6 = "INSERT INTO application_approvals (student_id, application_date, status) 
+                 VALUES ('$student_id', NOW(), 'Pending')";
         $result6 = mysqli_query($conn, $sql6);
 
         if ($result2 && $result3 && $result4 && $result5 && $result6) {
@@ -644,7 +652,7 @@ Please present this email to the <b>Dormitory Guard</b> upon exit and re-entry.
 
 <tr>
 <td style='background:#f9fafb; padding:20px; text-align:center; font-size:12px; color:#777;'>
-<p>© " . date('Y') . " IDORM System | Ilocos Sur Polytechnic State College</p>
+<p>© " . date('Y') . " IDORM System | Ilocos Sur Polytechnic State College</p> 
 <p>Vigan City, Ilocos Sur</p>
 <p style='font-size:11px;color:#aaa;'>This is an automated email. Please do not reply.</p>
 </td>

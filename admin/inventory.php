@@ -66,13 +66,13 @@ $result = mysqli_query($conn, "SELECT * FROM inventory ORDER BY id DESC");
                                 <td><?= htmlspecialchars($row['location']) ?></td>
                                 <td><?= htmlspecialchars($row['remarks']) ?></td>
                                 <td>
-                                    <button class="btn btn-sm btn-outline-primary"
+                                    <button class="btn btn-sm btn-outline-warning"
                                         onclick="openEditModal(<?= htmlspecialchars(json_encode($row)) ?>)">
-                                        ✏️
+                                        <i class="bi bi-pencil"></i>
                                     </button>
                                     <button class="btn btn-sm btn-outline-danger"
                                         onclick="deleteItem(<?= $row['id'] ?>)">
-                                        🗑️
+                                        <i class="bi bi-trash"></i>
                                     </button>
                                 </td>
                             </tr>

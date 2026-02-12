@@ -4,6 +4,11 @@ if (isset($_SESSION['student_id'])) {
     header("Location: student/dashboard.php");
     exit;
 }
+
+$error = '';
+if (isset($_GET['error'])) {
+    $error = $_GET['error'];
+}
 ?>
 
 <!DOCTYPE html>
@@ -107,10 +112,16 @@ if (isset($_SESSION['student_id'])) {
 
 <body>
     <div class="login-card">
+        <!-- Back to Landing -->
+        <div class="d-flex justify-content-start w-100">
+            <a href="index.php" class="btn btn-sm btn-outline-light mb-3">←</a>
+        </div>
         <img src="assets/img/logo.png" alt="IDORM Logo">
         <h3 class="fw-bold text-gold mb-3">Boarder Login</h3>
         <p class="text-light mb-4">Sign in with your Student ID and password</p>
-
+        <?php if ($error): ?>
+            <div class="alert alert-danger"><?php echo htmlspecialchars($error); ?></div>
+        <?php endif; ?>
         <form action="includes/processes.php" method="POST">
             <input type="text" name="student_id" class="form-control" placeholder="Student ID" required>
             <input type="password" name="password" class="form-control" placeholder="Password" required>

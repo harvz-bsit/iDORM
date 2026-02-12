@@ -43,17 +43,17 @@ include 'includes/header.php';
                                     <td><?php echo htmlspecialchars($row['description']); ?></td>
                                     <td><?php echo date('M d, Y', strtotime($row['date_posted'])); ?></td>
                                     <td>
-                                        <button class="btn btn-sm btn-primary"
+                                        <button class="btn btn-outline-warning btn-sm me-1"
                                             data-bs-toggle="modal"
                                             data-bs-target="#editAnnouncementModal"
                                             data-id="<?php echo $row['id']; ?>"
                                             data-title="<?php echo htmlspecialchars($row['title']); ?>"
                                             data-message="<?php echo htmlspecialchars($row['description']); ?>">
-                                            Edit
+                                            <i class="bi bi-pencil"></i>
                                         </button>
                                         <form method="POST" action="../includes/processes.php" class="d-inline">
                                             <input type="hidden" name="announcement_id" value="<?php echo $row['id']; ?>">
-                                            <button type="submit" name="delete_announcement" class="btn btn-sm btn-danger">Delete</button>
+                                            <button type="submit" name="delete_announcement" class="btn btn-outline-danger btn-sm me-1"><i class="bi bi-trash"></i></button>
                                         </form>
                                     </td>
                                 </tr>

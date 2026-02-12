@@ -53,7 +53,7 @@ $approval_row = mysqli_fetch_assoc($approval_result);
                     </h4>
                     <span class="badge 
                         <?php echo $latestReceipt ? 'bg-success' : 'bg-warning text-dark'; ?>">
-                        <?php echo $latestReceipt ? 'Paid' : 'Pending'; ?> (<?php echo date('F j, Y', strtotime($latestReceipt['paid_at'])) ?? 'N/A'; ?>)
+                        <?php echo $latestReceipt ? 'Paid' : 'Pending'; ?> (<?php echo $latestReceipt ? date('F j, Y', strtotime($latestReceipt['paid_at'])) : 'N/A'; ?>)
                     </span>
                 </div>
             </div>
