@@ -49,7 +49,7 @@ include 'includes/header.php';
             <div class="card shadow-sm border-0">
                 <div class="card-body">
                     <h5 class="fw-bold text-maroon mb-3">Maintenance Requests</h5>
-                    <div class="table-responsive">
+                    <div class="table-responsive" style="min-height: 300px;">
                         <table class="table table-striped align-middle">
                             <thead>
                                 <tr>
@@ -109,7 +109,7 @@ include 'includes/header.php';
             <div class="card shadow-sm border-0">
                 <div class="card-body">
                     <h5 class="fw-bold text-maroon mb-3">Complaints</h5>
-                    <div class="table-responsive">
+                    <div class="table-responsive" style="min-height: 300px;">
                         <table class="table table-striped align-middle">
                             <thead>
                                 <tr>
@@ -168,7 +168,7 @@ include 'includes/header.php';
             <div class="card shadow-sm border-0">
                 <div class="card-body">
                     <h5 class="fw-bold text-maroon mb-3">Passlip Requests</h5>
-                    <div class="table-responsive">
+                    <div class="table-responsive" style="min-height: 300px;">
                         <table class="table table-striped align-middle">
                             <thead>
                                 <tr>

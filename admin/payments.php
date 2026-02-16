@@ -13,7 +13,7 @@ include 'includes/header.php';
     <!-- Payments Table -->
     <div class="card border-0 shadow-sm">
         <div class="card-body">
-            <div class="table-responsive">
+            <div class="table-responsive" style="min-height: 300px;">
                 <table class="table align-middle" id="adminPaymentsTable">
                     <thead class="table-light">
                         <tr>
@@ -59,8 +59,15 @@ include 'includes/header.php';
                                     </td>
                                     <td>
                                         <?php if ($row['status'] === 'Pending') { ?>
-                                            <button class="btn btn-success btn-sm me-1 approve-btn" data-id="<?php echo $row['id']; ?>">Approve</button>
-                                            <button class="btn btn-danger btn-sm reject-btn" data-id="<?php echo $row['id']; ?>">Reject</button>
+                                            <div class="dropdown">
+                                                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                                    <i class="bi bi-three-dots-vertical"></i>
+                                                </button>
+                                                <ul class="dropdown-menu dropdown-menu-end">
+                                                    <li><a class="dropdown-item text-success approve-btn" href="#" data-id="<?php echo $row['id']; ?>"><i class="bi bi-check-circle me-2"></i>Approve</a></li>
+                                                    <li><a class="dropdown-item text-danger reject-btn" href="#" data-id="<?php echo $row['id']; ?>"><i class="bi bi-x-circle me-2"></i>Reject</a></li>
+                                                </ul>
+                                            </div>
                                         <?php } else { ?>
                                             <span class="text-muted">No actions</span>
                                         <?php } ?>

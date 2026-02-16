@@ -19,7 +19,7 @@ include 'includes/header.php';
     <!-- Announcements Table -->
     <div class="card shadow-sm border-0">
         <div class="card-body">
-            <div class="table-responsive">
+            <div class="table-responsive" style="min-height: 300px;">
                 <table class="table table-striped align-middle">
                     <thead>
                         <tr>
@@ -43,18 +43,29 @@ include 'includes/header.php';
                                     <td><?php echo htmlspecialchars($row['description']); ?></td>
                                     <td><?php echo date('M d, Y', strtotime($row['date_posted'])); ?></td>
                                     <td>
-                                        <button class="btn btn-outline-warning btn-sm me-1"
-                                            data-bs-toggle="modal"
-                                            data-bs-target="#editAnnouncementModal"
-                                            data-id="<?php echo $row['id']; ?>"
-                                            data-title="<?php echo htmlspecialchars($row['title']); ?>"
-                                            data-message="<?php echo htmlspecialchars($row['description']); ?>">
-                                            <i class="bi bi-pencil"></i>
-                                        </button>
-                                        <form method="POST" action="../includes/processes.php" class="d-inline">
-                                            <input type="hidden" name="announcement_id" value="<?php echo $row['id']; ?>">
-                                            <button type="submit" name="delete_announcement" class="btn btn-outline-danger btn-sm me-1"><i class="bi bi-trash"></i></button>
-                                        </form>
+                                        <div class="dropdown">
+                                            <button class="btn btn-sm btn-link text-dark" data-bs-toggle="dropdown">
+                                                <i class="bi bi-three-dots-vertical"></i>
+                                            </button>
+                                            <ul class="dropdown-menu">
+                                                <li>
+                                                    <button class="dropdown-item" data-bs-toggle="modal" data-bs-target="#editAnnouncementModal"
+                                                        data-id="<?php echo $row['id']; ?>"
+                                                        data-title="<?php echo htmlspecialchars($row['title']); ?>"
+                                                        data-message="<?php echo htmlspecialchars($row['description']); ?>">
+                                                        <i class="bi bi-pencil me-2"></i> Edit
+                                                    </button>
+                                                </li>
+                                                <li>
+                                                    <form method="POST" action="../includes/processes.php" class="d-inline w-100">
+                                                        <input type="hidden" name="announcement_id" value="<?php echo $row['id']; ?>">
+                                                        <button type="submit" name="delete_announcement" class="dropdown-item text-danger">
+                                                            <i class="bi bi-trash me-2"></i> Delete
+                                                        </button>
+                                                    </form>
+                                                </li>
+                                            </ul>
+                                        </div>
                                     </td>
                                 </tr>
                         <?php endwhile;

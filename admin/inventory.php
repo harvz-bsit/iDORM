@@ -23,7 +23,7 @@ $result = mysqli_query($conn, "SELECT * FROM inventory ORDER BY id DESC");
     <!-- Inventory Table -->
     <div class="card shadow-lg">
         <div class="card-body">
-            <div class="table-responsive">
+            <div class="table-responsive" style="min-height: 300px;">
                 <table class="table table-hover align-middle">
                     <thead class="table-light">
                         <tr>
@@ -66,14 +66,23 @@ $result = mysqli_query($conn, "SELECT * FROM inventory ORDER BY id DESC");
                                 <td><?= htmlspecialchars($row['location']) ?></td>
                                 <td><?= htmlspecialchars($row['remarks']) ?></td>
                                 <td>
-                                    <button class="btn btn-sm btn-outline-warning"
-                                        onclick="openEditModal(<?= htmlspecialchars(json_encode($row)) ?>)">
-                                        <i class="bi bi-pencil"></i>
-                                    </button>
-                                    <button class="btn btn-sm btn-outline-danger"
-                                        onclick="deleteItem(<?= $row['id'] ?>)">
-                                        <i class="bi bi-trash"></i>
-                                    </button>
+                                    <div class="dropdown">
+                                        <button class="btn btn-sm btn-link text-dark" data-bs-toggle="dropdown">
+                                            <i class="bi bi-three-dots-vertical"></i>
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-end">
+                                            <li>
+                                                <button class="dropdown-item" onclick="openEditModal(<?= htmlspecialchars(json_encode($row)) ?>)">
+                                                    <i class="bi bi-pencil"></i> Edit
+                                                </button>
+                                            </li>
+                                            <li>
+                                                <button class="dropdown-item text-danger" onclick="deleteItem(<?= $row['id'] ?>)">
+                                                    <i class="bi bi-trash"></i> Delete
+                                                </button>
+                                            </li>
+                                        </ul>
+                                    </div>
                                 </td>
                             </tr>
                         <?php endwhile; ?>

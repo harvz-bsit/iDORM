@@ -544,6 +544,42 @@ $error = $_GET['error'] ?? null;
                 </div>
             </div>
 
+            <div class="step">
+                <div class="row">
+                    <h5 class="text-light mb-3">Upload Profile Picture</h5>
+                    <div class="col-md-12">
+                        <input type="file" name="profile_picture" class="form-control" accept="image/*" required id="profilePictureInput">
+                    </div>
+
+                    <div class="col-md-12 mt-3 text-center">
+                        <img id="profilePreview" src="" alt="Profile Picture Preview" style="width: 200px; height: 200px; border-radius: 50%; display: none; margin-top: 15px; border: 2px solid var(--gold); object-fit: cover;">
+                    </div>
+
+                    <div class="col-md-12 mt-3 text-end">
+                        <button type="button" class="btn btn-nav prev">← Back</button>
+                        <button type="button" class="btn btn-nav next">Next →</button>
+                    </div>
+                </div>
+            </div>
+
+            <script>
+                document.getElementById('profilePictureInput').addEventListener('change', function(e) {
+                    const file = e.target.files[0];
+                    const preview = document.getElementById('profilePreview');
+
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = function(event) {
+                            preview.src = event.target.result;
+                            preview.style.display = 'block';
+                        };
+                        reader.readAsDataURL(file);
+                    } else {
+                        preview.style.display = 'none';
+                    }
+                });
+            </script>
+
             <!-- STEP 5: CONFIRMATION -->
             <div class="step">
                 <div class="row">

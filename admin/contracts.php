@@ -28,7 +28,7 @@ $result = mysqli_query($conn, $query);
     </div>
 
     <div class="card shadow-sm p-4">
-        <div class="table-responsive">
+        <div class="table-responsive" style="min-height: 300px;">
             <table class="table table-hover align-middle" id="contractsTable">
                 <thead class="table-maroon text-white">
                     <tr>
@@ -73,21 +73,31 @@ $result = mysqli_query($conn, $query);
                                     </span>
                                 </td>
                                 <td>
-                                    <button class="btn btn-outline-warning btn-sm edit-contract"
-                                        data-id="<?= $row['id'] ?>"
-                                        data-status="<?= $row['status'] ?>"
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#editContractModal">
-                                        <i class="bi bi-pencil"></i>
-                                    </button>
-
-                                    <button class="btn btn-outline-danger btn-sm delete-contract"
-                                        data-id="<?= $row['id'] ?>"
-                                        data-name="<?= htmlspecialchars($row['full_name']) ?>"
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#deleteContractModal">
-                                        <i class="bi bi-trash"></i>
-                                    </button>
+                                    <div class="dropdown">
+                                        <button class="btn btn-outline-secondary btn-sm" type="button" data-bs-toggle="dropdown">
+                                            <i class="bi bi-three-dots-vertical"></i>
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-end">
+                                            <li>
+                                                <button class="dropdown-item edit-contract"
+                                                    data-id="<?= $row['id'] ?>"
+                                                    data-status="<?= $row['status'] ?>"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#editContractModal">
+                                                    <i class="bi bi-pencil"></i> Edit
+                                                </button>
+                                            </li>
+                                            <li>
+                                                <button class="dropdown-item text-danger delete-contract"
+                                                    data-id="<?= $row['id'] ?>"
+                                                    data-name="<?= htmlspecialchars($row['full_name']) ?>"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#deleteContractModal">
+                                                    <i class="bi bi-trash"></i> Delete
+                                                </button>
+                                            </li>
+                                        </ul>
+                                    </div>
                                 </td>
                             </tr>
                     <?php
@@ -136,26 +146,25 @@ $result = mysqli_query($conn, $query);
 <div class="modal fade" id="deleteContractModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content p-3">
-            <form method="POST" action="../includes/processes.php">
-                <input type="hidden" name="contract_id" id="delete_contract_id">
+            <div class="modal-header">
+                <h5 class="modal-title text-danger fw-semibold">
+                    <i class="bi bi-exclamation-triangle"></i> Delete Contract
+                </h5>
+                <button class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
 
-                <div class="modal-header">
-                    <h5 class="modal-title text-danger fw-semibold">
-                        <i class="bi bi-exclamation-triangle"></i> Delete Contract
-                    </h5>
-                    <button class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
+            <div class="modal-body">
+                <p>Delete contract of <strong id="delete_contract_name"></strong>?</p>
+                <p class="text-muted small">This cannot be undone.</p>
+            </div>
 
-                <div class="modal-body">
-                    <p>Delete contract of <strong id="delete_contract_name"></strong>?</p>
-                    <p class="text-muted small">This cannot be undone.</p>
-                </div>
-
-                <div class="modal-footer">
-                    <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+            <div class="modal-footer">
+                <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form method="POST" action="../includes/processes.php">
+                    <input type="hidden" name="contract_id" id="delete_contract_id">
                     <button class="btn btn-danger" name="deleteContract">Delete</button>
-                </div>
-            </form>
+                </form>
+            </div>
         </div>
     </div>
 </div>

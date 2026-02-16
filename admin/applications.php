@@ -33,7 +33,7 @@ $result = $conn->query("SELECT * FROM application_approvals WHERE status='Pendin
     </div>
 
     <!-- Applications Table -->
-    <div class="card shadow-sm p-4">
+    <div class="card shadow-sm p-4" style="min-height: 300px;">
         <table class="table table-hover align-middle">
             <thead class="table-maroon text-white">
                 <tr>

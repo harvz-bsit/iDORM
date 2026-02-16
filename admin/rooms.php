@@ -20,7 +20,7 @@
                 </button>
             </div>
 
-            <div class="table-responsive">
+            <div class="table-responsive" style="min-height: 300px;">
                 <table class="table align-middle">
                     <thead class="table-light">
                         <tr>
@@ -48,30 +48,43 @@
                                     echo "<span class='badge $badgeClass'>$status</span>";
                                     ?></td>
                                 <td>
-                                    <button class="btn btn-outline-maroon btn-sm me-1"
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#viewRoomModal"
-                                        data-room="<?= $room['room_number']; ?>"
-                                        data-capacity="<?= $room['capacity']; ?>"
-                                        data-occupied="<?= $room['occupied']; ?>">
-                                        <i class="bi bi-eye"></i>
-                                    </button>
-                                    <button class="btn btn-outline-warning btn-sm me-1 edit-room-btn"
-                                        data-id="<?= $room['id'] ?>"
-                                        data-room="<?= $room['room_number'] ?>"
-                                        data-capacity="<?= $room['capacity'] ?>"
-                                        data-status="<?= $room['status'] ?>"
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#editRoomModal">
-                                        <i class="bi bi-pencil"></i>
-                                    </button>
-                                    <button class="btn btn-outline-danger btn-sm delete-room-btn"
-                                        data-id="<?= $room['id'] ?>"
-                                        data-room="<?= $room['room_number'] ?>"
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#deleteRoomModal">
-                                        <i class="bi bi-trash"></i>
-                                    </button>
+                                    <div class="dropdown">
+                                        <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="dropdown">
+                                            <i class="bi bi-three-dots-vertical"></i>
+                                        </button>
+                                        <ul class="dropdown-menu">
+                                            <li>
+                                                <button class="dropdown-item" data-bs-toggle="modal" data-bs-target="#viewRoomModal"
+                                                    data-room="<?= $room['room_number']; ?>"
+                                                    data-capacity="<?= $room['capacity']; ?>"
+                                                    data-occupied="<?= $room['occupied']; ?>">
+                                                    <i class="bi bi-eye"></i> View
+                                                </button>
+                                            </li>
+                                            <li>
+                                                <button class="dropdown-item edit-room-btn" data-id="<?= $room['id'] ?>"
+                                                    data-room="<?= $room['room_number'] ?>"
+                                                    data-capacity="<?= $room['capacity'] ?>"
+                                                    data-status="<?= $room['status'] ?>"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#editRoomModal">
+                                                    <i class="bi bi-pencil"></i> Edit
+                                                </button>
+                                            </li>
+                                            <li>
+                                                <hr class="dropdown-divider">
+                                            </li>
+                                            <li>
+                                                <button class="dropdown-item text-danger delete-room-btn"
+                                                    data-id="<?= $room['id'] ?>"
+                                                    data-room="<?= $room['room_number'] ?>"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#deleteRoomModal">
+                                                    <i class="bi bi-trash"></i> Delete
+                                                </button>
+                                            </li>
+                                        </ul>
+                                    </div>
                                 </td>
                             </tr>
                         <?php
