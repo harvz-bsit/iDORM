@@ -34,72 +34,74 @@ $result = $conn->query("SELECT * FROM application_approvals WHERE status='Approv
 
     <!-- Applications Table -->
     <div class="card shadow-sm p-4">
-        <table class="table table-hover align-middle">
-            <thead class="table-maroon text-white">
-                <tr>
-                    <th>#</th>
-                    <th>Full Name</th>
-                    <th>Email</th>
-                    <th>Course</th>
-                    <th>Year</th>
-                    <th>Date Applied</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php
-                $count = 1;
+        <div class="table-responsive" style="min-height: 300px;">
+            <table class="table table-hover align-middle">
+                <thead class="table-maroon text-white">
+                    <tr>
+                        <th>#</th>
+                        <th>Full Name</th>
+                        <th>Email</th>
+                        <th>Course</th>
+                        <th>Year</th>
+                        <th>Date Applied</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php
+                    $count = 1;
 
-                if ($result->num_rows < 1) {
-                    echo '<tr><td colspan="8" class="text-center text-muted">No approved applications found.</td></tr>';
-                } else {
-                    while ($row = $result->fetch_assoc()) {
-                        $student_id = $row['student_id'];
+                    if ($result->num_rows < 1) {
+                        echo '<tr><td colspan="8" class="text-center text-muted">No approved applications found.</td></tr>';
+                    } else {
+                        while ($row = $result->fetch_assoc()) {
+                            $student_id = $row['student_id'];
 
-                        // Fetch personal information
-                        $result_info = mysqli_query($conn, "SELECT * FROM user_personal_information WHERE student_id='$student_id'");
-                        $row_info = mysqli_fetch_assoc($result_info);
+                            // Fetch personal information
+                            $result_info = mysqli_query($conn, "SELECT * FROM user_personal_information WHERE student_id='$student_id'");
+                            $row_info = mysqli_fetch_assoc($result_info);
 
-                        // Fetch email
-                        $email_result = mysqli_query($conn, "SELECT email FROM users WHERE student_id='$student_id'");
-                        $email_row = mysqli_fetch_assoc($email_result);
+                            // Fetch email
+                            $email_result = mysqli_query($conn, "SELECT email FROM users WHERE student_id='$student_id'");
+                            $email_row = mysqli_fetch_assoc($email_result);
 
-                        // Fetch Educational Background
-                        $edu_result = mysqli_query($conn, "SELECT * FROM user_educational_background WHERE student_id='$student_id'");
-                        $edu_row = mysqli_fetch_assoc($edu_result);
-                ?>
-                        <tr>
-                            <td><?= $count++ ?></td>
-                            <td><?= htmlspecialchars($row_info['full_name']) ?></td>
-                            <td><?= htmlspecialchars($email_row['email']) ?></td>
-                            <td><?= htmlspecialchars($edu_row['course']) ?></td>
-                            <td><?= htmlspecialchars($edu_row['year_level']) ?></td>
-                            <td><?= date("F d, Y", strtotime($row['application_date'])) ?></td>
-                            <td>
-                                <?php if ($row['status'] === 'Pending'): ?>
-                                    <span class="badge bg-warning text-dark">Pending</span>
-                                <?php elseif ($row['status'] === 'Approved'): ?>
-                                    <span class="badge bg-success">Approved</span>
-                                <?php else: ?>
-                                    <span class="badge bg-danger">Rejected</span>
-                                <?php endif; ?>
-                            </td>
-                            <td>
-                                <button class="btn btn-sm btn-outline-maroon viewBtn"
-                                    data-id="<?= $student_id ?>"
-                                    data-bs-toggle="modal"
-                                    data-bs-target="#viewModal">
-                                    <i class="bi bi-eye"></i> View
-                                </button>
-                            </td>
-                        </tr>
-                <?php
+                            // Fetch Educational Background
+                            $edu_result = mysqli_query($conn, "SELECT * FROM user_educational_background WHERE student_id='$student_id'");
+                            $edu_row = mysqli_fetch_assoc($edu_result);
+                    ?>
+                            <tr>
+                                <td><?= $count++ ?></td>
+                                <td><?= htmlspecialchars($row_info['full_name']) ?></td>
+                                <td><?= htmlspecialchars($email_row['email']) ?></td>
+                                <td><?= htmlspecialchars($edu_row['course']) ?></td>
+                                <td><?= htmlspecialchars($edu_row['year_level']) ?></td>
+                                <td><?= date("F d, Y", strtotime($row['application_date'])) ?></td>
+                                <td>
+                                    <?php if ($row['status'] === 'Pending'): ?>
+                                        <span class="badge bg-warning text-dark">Pending</span>
+                                    <?php elseif ($row['status'] === 'Approved'): ?>
+                                        <span class="badge bg-success">Approved</span>
+                                    <?php else: ?>
+                                        <span class="badge bg-danger">Rejected</span>
+                                    <?php endif; ?>
+                                </td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-maroon viewBtn"
+                                        data-id="<?= $student_id ?>"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#viewModal">
+                                        <i class="bi bi-eye"></i> View
+                                    </button>
+                                </td>
+                            </tr>
+                    <?php
+                        }
                     }
-                }
-                ?>
-            </tbody>
-        </table>
+                    ?>
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 
