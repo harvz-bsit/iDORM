@@ -26,4 +26,11 @@ node_modules/
 *.tmp
 *.swp
 
-receipts/
+receipts/*
+!receipts/.gitkeep
+
+assets/profile_pictures/*
+!assets/profile_pictures/.gitkeep
+
+signatures/*
+!signatures/.gitkeep

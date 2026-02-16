@@ -151,7 +151,7 @@ $error = $_GET['error'] ?? null;
             <small>Put N/A if not applicable</small>
         </div>
 
-        <form id="applicationForm" action="includes/processes.php" method="POST">
+        <form id="applicationForm" action="includes/processes.php" method="POST" enctype="multipart/form-data">
             <!-- STEP 1: PERSONAL INFO -->
             <div class="step active">
                 <div class="row">
@@ -234,33 +234,33 @@ $error = $_GET['error'] ?? null;
 
                     <div class="col-md-6">
                         <label>Elementary School</label>
-                        <input type="text" name="elem_school" class="form-control">
+                        <input type="text" name="elem_school" class="form-control" required>
                     </div>
                     <div class="col-md-6">
                         <label>Elementary Year Attended</label>
-                        <input type="text" name="elem_year" class="form-control">
+                        <input type="text" name="elem_year" class="form-control" required>
                     </div>
 
                     <div class="col-md-6">
                         <label>Secondary School</label>
-                        <input type="text" name="sec_school" class="form-control">
+                        <input type="text" name="sec_school" class="form-control" required>
                     </div>
                     <div class="col-md-6">
                         <label>Secondary Year Attended</label>
-                        <input type="text" name="sec_year" class="form-control">
+                        <input type="text" name="sec_year" class="form-control" required>
                     </div>
 
                     <div class="col-md-6">
                         <label>College</label>
-                        <input type="text" name="college_school" class="form-control">
+                        <input type="text" name="college_school" class="form-control" required>
                     </div>
                     <div class="col-md-6">
                         <label>College Year Attended</label>
-                        <input type="text" name="college_year" class="form-control">
+                        <input type="text" name="college_year" class="form-control" required>
                     </div>
                     <div class="col-md-6">
                         <label>Current Course Enrolled</label>
-                        <input type="text" name="course" class="form-control">
+                        <input type="text" name="course" class="form-control" required>
                     </div>
                     <div class="col-md-6">
                         <label>Year Level</label>
@@ -287,55 +287,55 @@ $error = $_GET['error'] ?? null;
 
                     <div class="col-md-4">
                         <label>Father's Name</label>
-                        <input type="text" name="father_name" class="form-control">
+                        <input type="text" name="father_name" class="form-control" required>
                     </div>
                     <div class="col-md-2">
                         <label>Age</label>
-                        <input type="number" name="father_age" class="form-control">
+                        <input type="number" name="father_age" class="form-control" required>
                     </div>
                     <div class="col-md-3">
                         <label>Occupation</label>
-                        <input type="text" name="father_occupation" class="form-control">
+                        <input type="text" name="father_occupation" class="form-control" required>
                     </div>
                     <div class="col-md-3">
                         <label>Contact No.</label>
-                        <input type="text" name="father_contact" class="form-control">
+                        <input type="text" name="father_contact" class="form-control" required>
                     </div>
                     <div class="col-md-4">
                         <label>Mother's Name</label>
-                        <input type="text" name="mother_name" class="form-control">
+                        <input type="text" name="mother_name" class="form-control" required>
                     </div>
                     <div class="col-md-2">
                         <label>Age</label>
-                        <input type="number" name="mother_age" class="form-control">
+                        <input type="number" name="mother_age" class="form-control" required>
                     </div>
                     <div class="col-md-3">
                         <label>Occupation</label>
-                        <input type="text" name="mother_occupation" class="form-control">
+                        <input type="text" name="mother_occupation" class="form-control" required>
                     </div>
                     <div class="col-md-3">
                         <label>Contact No.</label>
-                        <input type="text" name="mother_contact" class="form-control">
+                        <input type="text" name="mother_contact" class="form-control" required>
                     </div>
                     <div class="col-md-4">
                         <label>Guardian (if any)</label>
-                        <input type="text" name="guardian_name" class="form-control">
+                        <input type="text" name="guardian_name" class="form-control" required>
                     </div>
                     <div class="col-md-4">
                         <label>Guardian Contact</label>
-                        <input type="text" name="guardian_contact" class="form-control">
+                        <input type="text" name="guardian_contact" class="form-control" required>
                     </div>
                     <div class="col-md-4">
                         <label>Relationship</label>
-                        <input type="text" name="guardian_relation" class="form-control">
+                        <input type="text" name="guardian_relation" class="form-control" required>
                     </div>
                     <div class="col-md-6">
                         <label>Parent's Monthly Income</label>
-                        <input type="text" name="parent_income" class="form-control">
+                        <input type="text" name="parent_income" class="form-control" required>
                     </div>
                     <div class="col-md-6">
                         <label>No. of Siblings</label>
-                        <input type="number" name="siblings" class="form-control">
+                        <input type="number" name="siblings" class="form-control" required>
                     </div>
 
                     <div class="col-md-12 mt-3 text-end">
@@ -352,35 +352,35 @@ $error = $_GET['error'] ?? null;
 
                     <div class="col-md-6">
                         <label>Height (cm)</label>
-                        <input type="text" name="height" class="form-control">
+                        <input type="text" name="height" class="form-control" required>
                     </div>
                     <div class="col-md-6">
                         <label>Weight (kg)</label>
-                        <input type="text" name="weight" class="form-control">
+                        <input type="text" name="weight" class="form-control" required>
                     </div>
 
                     <div class="col-md-6">
                         <label>Blood Type</label>
-                        <input type="text" name="blood_type" class="form-control">
+                        <input type="text" name="blood_type" class="form-control" required>
                     </div>
                     <div class="col-md-6">
                         <label>Known Allergies</label>
-                        <input type="text" name="allergies" class="form-control" placeholder="e.g. Food, Drugs, Others">
+                        <input type="text" name="allergies" class="form-control" placeholder="e.g. Food, Drugs, Others" required>
                     </div>
 
                     <div class="col-md-12">
                         <label>Pre-existing Conditions / Chronic Illness</label>
-                        <input type="text" name="conditions" class="form-control">
+                        <input type="text" name="conditions" class="form-control" required>
                     </div>
 
                     <div class="col-md-12">
                         <label>History of Serious Illness or Surgery</label>
-                        <input type="text" name="illness_history" class="form-control">
+                        <input type="text" name="illness_history" class="form-control" required>
                     </div>
 
                     <div class="col-md-12">
                         <label>Current Medication</label>
-                        <input type="text" name="current_medication" class="form-control">
+                        <input type="text" name="current_medication" class="form-control" required>
                     </div>
 
                     <!-- Communicable Diseases -->
@@ -547,14 +547,21 @@ $error = $_GET['error'] ?? null;
             <div class="step">
                 <div class="row">
                     <h5 class="text-light mb-3">Upload Profile Picture</h5>
-                    <div class="col-md-12">
-                        <input type="file" name="profile_picture" class="form-control" accept="image/*" required id="profilePictureInput">
-                    </div>
 
+                    <!-- Clickable preview circle -->
                     <div class="col-md-12 mt-3 text-center">
-                        <img id="profilePreview" src="" alt="Profile Picture Preview" style="width: 200px; height: 200px; border-radius: 50%; display: none; margin-top: 15px; border: 2px solid var(--gold); object-fit: cover;">
+                        <div id="profileContainer"
+                            style="width: 200px; height: 200px; border-radius: 50%; border: 2px solid var(--gold); background-color: #fff; display:flex; align-items:center; justify-content:center; margin: 0 auto; cursor: pointer; overflow: hidden;">
+                            <span id="placeholderText" style="color: #aaa; font-size: 16px; text-align:center;">Click to select</span>
+                            <img id="profilePreview" src="" alt="Profile Picture Preview"
+                                style="width:100%; height:100%; object-fit:cover; display:none;">
+                        </div>
                     </div>
 
+                    <!-- Hidden file input -->
+                    <input type="file" name="profile_picture" class="form-control" accept="image/*" required id="profilePictureInput" style="display:none;" required>
+
+                    <!-- Navigation buttons -->
                     <div class="col-md-12 mt-3 text-end">
                         <button type="button" class="btn btn-nav prev">← Back</button>
                         <button type="button" class="btn btn-nav next">Next →</button>
@@ -563,19 +570,28 @@ $error = $_GET['error'] ?? null;
             </div>
 
             <script>
-                document.getElementById('profilePictureInput').addEventListener('change', function(e) {
-                    const file = e.target.files[0];
-                    const preview = document.getElementById('profilePreview');
+                const input = document.getElementById('profilePictureInput');
+                const preview = document.getElementById('profilePreview');
+                const placeholder = document.getElementById('placeholderText');
+                const container = document.getElementById('profileContainer');
 
+                // Click on the circle opens file picker
+                container.addEventListener('click', () => input.click());
+
+                // When file is selected
+                input.addEventListener('change', function(e) {
+                    const file = e.target.files[0];
                     if (file) {
                         const reader = new FileReader();
                         reader.onload = function(event) {
                             preview.src = event.target.result;
                             preview.style.display = 'block';
+                            placeholder.style.display = 'none';
                         };
                         reader.readAsDataURL(file);
                     } else {
                         preview.style.display = 'none';
+                        placeholder.style.display = 'block';
                     }
                 });
             </script>
@@ -657,29 +673,6 @@ $error = $_GET['error'] ?? null;
             <a href="index.php" class="text-decoration-none text-light">← Back to Home</a>
         </div>
     </div>
-
-    <script>
-        const steps = document.querySelectorAll(".step");
-        const nextBtns = document.querySelectorAll(".next");
-        const prevBtns = document.querySelectorAll(".prev");
-        let currentStep = 0;
-
-        nextBtns.forEach(btn => {
-            btn.addEventListener("click", () => {
-                steps[currentStep].classList.remove("active");
-                currentStep++;
-                steps[currentStep].classList.add("active");
-            });
-        });
-
-        prevBtns.forEach(btn => {
-            btn.addEventListener("click", () => {
-                steps[currentStep].classList.remove("active");
-                currentStep--;
-                steps[currentStep].classList.add("active");
-            });
-        });
-    </script>
     <script>
         (function() {
             const issueYes = document.getElementById('issueYes');
@@ -828,6 +821,72 @@ $error = $_GET['error'] ?? null;
             });
         </script>
     <?php endif; ?>
+    <script>
+        const steps = document.querySelectorAll(".step");
+        const nextBtns = document.querySelectorAll(".next");
+        const prevBtns = document.querySelectorAll(".prev");
+        let currentStep = 0;
+
+        // Function to validate all required fields in a given step
+        function validateStep(step) {
+            const requiredFields = step.querySelectorAll('[required]');
+            let missing = [];
+
+            requiredFields.forEach(field => {
+                // Handle checkboxes and radio buttons
+                if ((field.type === 'checkbox' || field.type === 'radio')) {
+                    const group = step.querySelectorAll(`[name="${field.name}"]`);
+                    const checked = Array.from(group).some(r => r.checked);
+                    if (!checked) {
+                        const label = step.querySelector(`label[for="${field.id}"]`);
+                        const name = label ? label.innerText : field.name;
+                        missing.push(name);
+                    }
+                } else {
+                    if (!field.value.trim()) {
+                        const label = step.querySelector(`label[for="${field.id}"]`);
+                        const name = label ? label.innerText : field.name;
+                        missing.push(name);
+                    }
+                }
+            });
+
+            return missing;
+        }
+
+        // Next button click
+        nextBtns.forEach(btn => {
+            btn.addEventListener("click", () => {
+                const step = steps[currentStep];
+                const missing = validateStep(step);
+
+                if (missing.length > 0) {
+                    // Show SweetAlert for missing fields
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Incomplete Step',
+                        html: 'Please fill out the following required fields:<br><b>' + missing.join('<br>') + '</b><br> Type N/A if not applicable.',
+                        confirmButtonColor: '#e3b23c'
+                    });
+                    return; // don't go to next step
+                }
+
+                // Proceed to next step
+                steps[currentStep].classList.remove("active");
+                currentStep++;
+                steps[currentStep].classList.add("active");
+            });
+        });
+
+        // Prev button click
+        prevBtns.forEach(btn => {
+            btn.addEventListener("click", () => {
+                steps[currentStep].classList.remove("active");
+                currentStep--;
+                steps[currentStep].classList.add("active");
+            });
+        });
+    </script>
 </body>
 
 </html>

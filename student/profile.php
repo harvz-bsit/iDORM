@@ -35,9 +35,30 @@ include 'includes/header.php';
                     }
                     ?>
 
-                    <form id="profileForm" method="POST" action="../includes/processes.php">
+                    <form id="profileForm" method="POST" action="../includes/processes.php" enctype="multipart/form-data">
                         <div class="row g-3">
+                            <!-- Profile Picture -->
+                            <div class="col-md-12 text-center">
+                                <div id="profileContainer"
+                                    style="width: 180px; height: 180px; border-radius: 50%; border: 2px solid #d4af37;
+                margin: 0 auto; cursor: pointer; overflow: hidden;
+                display: flex; align-items: center; justify-content: center;
+                background-color: #fff;">
 
+                                    <img id="profilePreview"
+                                        src="../assets/profile_pictures/<?= $student['profile_picture'] ?? 'default.png'; ?>"
+                                        alt="Profile Picture"
+                                        style="width:100%; height:100%; object-fit:cover;">
+                                </div>
+                                <small class="text-muted d-block mt-2">Click the picture to change</small>
+
+                                <!-- Hidden input -->
+                                <input type="file"
+                                    name="profile_picture"
+                                    id="profilePictureInput"
+                                    accept="image/*"
+                                    style="display:none;">
+                            </div>
                             <!-- Student ID (view only) -->
                             <div class="col-md-6">
                                 <label class="form-label fw-semibold">Student ID</label>
@@ -152,5 +173,26 @@ include 'includes/header.php';
         </div>
     </div>
 </div>
+<script>
+    const input = document.getElementById('profilePictureInput');
+    const preview = document.getElementById('profilePreview');
+    const container = document.getElementById('profileContainer');
 
+    // Click circle → open file picker
+    container.addEventListener('click', () => {
+        input.click();
+    });
+
+    // Live preview
+    input.addEventListener('change', function() {
+        const file = this.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                preview.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+</script>
 <?php include 'includes/footer.php'; ?>

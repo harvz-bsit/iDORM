@@ -52,15 +52,19 @@ if (isset($_POST['login'])) {
 }
 
 // Dormitory Application Submission & User Creation
+
 if (isset($_POST['submit'])) {
-    // Validation
+    // DB connection assumed as $conn
+
+    // Helper: sanitize input
     function validate($data)
     {
-        $data = trim($data);
-        $data = stripslashes($data);
-        $data = htmlspecialchars($data);
-        return $data;
+        return htmlspecialchars(stripslashes(trim($data)));
     }
+
+    // -------------------------------
+    // 1️⃣ Gather Inputs
+    // -------------------------------
     // Personal Information
     $student_id = validate($_POST['student_id']);
     $full_name = validate($_POST['full_name']);
@@ -106,81 +110,125 @@ if (isset($_POST['submit'])) {
     $blood_type = validate($_POST['blood_type']);
     $allergies = validate($_POST['allergies']);
     $conditions = validate($_POST['conditions']);
-    $last_med_checkup = validate($_POST['last_med_checkup']);
     $illness_history = validate($_POST['illness_history']);
     $current_medication = validate($_POST['current_medication']);
+    $last_med_checkup = validate($_POST['last_med_checkup']);
+
     $communicable = $_POST['communicable'] ?? 'None';
     $communicable_name = ($communicable === 'Yes') ? $_POST['communicable_name'] : NULL;
     $communicable_medication = ($communicable === 'Yes') ? $_POST['communicable_medication'] : NULL;
+
     $mental_health = $_POST['mental_health'] ?? 'None';
     $mental_health_name = ($mental_health === 'Yes') ? $_POST['mental_health_name'] : NULL;
     $mental_health_medication = ($mental_health === 'Yes') ? $_POST['mental_health_medication'] : NULL;
+
     $physical = $_POST['physical'] ?? 'None';
     $physical_name = ($physical === 'Yes') ? $_POST['physical_name'] : NULL;
     $physical_medication = ($physical === 'Yes') ? $_POST['physical_medication'] : NULL;
+
     $menstrual_cycle = $_POST['menstrual_cycle'] ?? NULL;
     $reproductive_issue = $_POST['reproductive_issue'] ?? 'None';
     $reproductive_specify = ($reproductive_issue === 'Yes') ? $_POST['reproductive_specify'] : NULL;
     $reproductive_medication = ($reproductive_issue === 'Yes') ? $_POST['reproductive_medication'] : NULL;
+
     $pregnant = $_POST['pregnant'] ?? 'No';
     $last_checkup = ($pregnant === 'Yes') ? $_POST['last_checkup'] : NULL;
     $due_date = ($pregnant === 'Yes') ? $_POST['due_date'] : NULL;
     $physician_name = ($pregnant === 'Yes') ? $_POST['physician_name'] : NULL;
     $physician_contact = ($pregnant === 'Yes') ? $_POST['physician_contact'] : NULL;
 
-    // Default Password
+    // Default password
     $default_password = password_hash('password123', PASSWORD_BCRYPT);
 
-    // Check if student id and email already exists
-    $checkSql = "SELECT * FROM users WHERE student_id='$student_id' OR email='$email'";
-    $checkResult = mysqli_query($conn, $checkSql);
-    if (mysqli_num_rows($checkResult) > 0) {
+    // -------------------------------
+    // 2️⃣ Profile Picture Upload
+    // -------------------------------
+    if (isset($_FILES['profile_picture']) && $_FILES['profile_picture']['error'] === UPLOAD_ERR_OK) {
+        $fileTmpPath = $_FILES['profile_picture']['tmp_name'];
+        $fileName = $_FILES['profile_picture']['name'];
+        $fileExt = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
+
+        $allowed = ['jpg', 'jpeg', 'png', 'gif'];
+        if (!in_array($fileExt, $allowed)) {
+            header("Location: ../apply.php?error=Invalid file type. Only JPG, PNG, GIF allowed.");
+            exit();
+        }
+
+        $newFileName = uniqid('profile_', true) . '.' . $fileExt;
+        $uploadPath = "../assets/profile_pictures/" . $newFileName;
+
+        if (!move_uploaded_file($fileTmpPath, $uploadPath)) {
+            header("Location: ../apply.php?error=Failed to upload profile picture.");
+            exit();
+        }
+
+        $profile_picture = $newFileName;
+    } else {
+        header("Location: ../apply.php?error=Profile picture is required.");
+        exit();
+    }
+
+    // -------------------------------
+    // 3️⃣ Check Duplicate Student ID or Email
+    // -------------------------------
+    $stmtCheck = $conn->prepare("SELECT * FROM users WHERE student_id=? OR email=?");
+    $stmtCheck->bind_param("ss", $student_id, $email);
+    $stmtCheck->execute();
+    $checkResult = $stmtCheck->get_result();
+    if ($checkResult->num_rows > 0) {
         header("Location: ../apply.php?error=Student ID or Email already exists.");
         exit();
     }
 
-    // Create User Based on Student ID
-    $sql = "INSERT INTO users (student_id, password, email) VALUES ('$student_id', '$default_password', '$email')";
-    $result = mysqli_query($conn, $sql);
+    // -------------------------------
+    // 4️⃣ Begin Transaction
+    // -------------------------------
+    mysqli_begin_transaction($conn);
+    try {
+        // Insert user
+        $stmt1 = $conn->prepare("INSERT INTO users (student_id, password, email, profile_picture) VALUES (?, ?, ?, ?)");
+        $stmt1->bind_param("ssss", $student_id, $default_password, $email, $profile_picture);
+        $stmt1->execute();
 
-    // Insert all information after successful user creation
-    if ($result) {
-        $sql2 = "INSERT INTO user_personal_information (student_id, full_name, nickname, age, sex, civil_status, nationality, contact, address, date_of_birth, place_of_birth) 
-                 VALUES ('$student_id', '$full_name', '$nickname', '$age', '$sex', '$civil_status', '$nationality', '$contact', '$address', '$date_of_birth', '$place_of_birth')";
-        $result2 = mysqli_query($conn, $sql2);
+        // Personal Info
+        $stmt2 = $conn->prepare("INSERT INTO user_personal_information (student_id, full_name, nickname, age, sex, civil_status, nationality, contact, address, date_of_birth, place_of_birth) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        $stmt2->bind_param("sssisssisss", $student_id, $full_name, $nickname, $age, $sex, $civil_status, $nationality, $contact, $address, $date_of_birth, $place_of_birth);
+        $stmt2->execute();
 
-        $sql3 = "INSERT INTO user_educational_background (student_id, elem_school, elem_year, sec_school, sec_year, college_school, college_year, course, year_level) 
-                 VALUES ('$student_id', '$elem_school', '$elem_year', '$sec_school', '$sec_year', '$college_school', '$college_year', '$course', '$year_level')";
-        $result3 = mysqli_query($conn, $sql3);
+        // Educational Background
+        $stmt3 = $conn->prepare("INSERT INTO user_educational_background (student_id, elem_school, elem_year, sec_school, sec_year, college_school, college_year, course, year_level) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        $stmt3->bind_param("sssssssss", $student_id, $elem_school, $elem_year, $sec_school, $sec_year, $college_school, $college_year, $course, $year_level);
+        $stmt3->execute();
 
-        $sql4 = "INSERT INTO user_family_background (student_id, father_name, father_occupation, father_age, father_contact, mother_name, mother_occupation, mother_age, mother_contact, guardian_name, guardian_contact, guardian_relation, parent_income, siblings) 
-                 VALUES ('$student_id', '$father_name', '$father_occupation', '$father_age', '$father_contact', '$mother_name', '$mother_occupation', '$mother_age', '$mother_contact', '$guardian_name', '$guardian_contact', '$guardian_relation', '$parent_income', '$siblings')";
-        $result4 = mysqli_query($conn, $sql4);
+        // Family Background
+        $stmt4 = $conn->prepare("INSERT INTO user_family_background (student_id, father_name, father_occupation, father_age, father_contact, mother_name, mother_occupation, mother_age, mother_contact, guardian_name, guardian_contact, guardian_relation, parent_income, siblings) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        $stmt4->bind_param("sssiissiisisii", $student_id, $father_name, $father_occupation, $father_age, $father_contact, $mother_name, $mother_occupation, $mother_age, $mother_contact, $guardian_name, $guardian_contact, $guardian_relation, $parent_income, $siblings);
+        $stmt4->execute();
 
-        $sql5 = "INSERT INTO user_medical_history (student_id, height, weight, blood_type, allergies, conditions, illness_history, current_medication, communicable, communicable_name, communicable_medication, mental_health, mental_health_name, mental_health_medication, physical, physical_name, physical_medication, last_med_checkup, menstrual_cycle, reproductive_issue, reproductive_specify, reproductive_medication, last_checkup, due_date, physician_name, physician_contact) 
-                 VALUES ('$student_id', '$height', '$weight', '$blood_type', '$allergies', '$conditions', '$illness_history', '$current_medication', '$communicable', '$communicable_name', '$communicable_medication', '$mental_health', '$mental_health_name', '$mental_health_medication', '$physical', '$physical_name', '$last_med_checkup', '$physical_medication', '$menstrual_cycle', '$reproductive_issue', '$reproductive_specify', '$reproductive_medication', '$last_checkup', '$due_date', '$physician_name', '$physician_contact')";
-        $result5 = mysqli_query($conn, $sql5);
+        // Medical History
+        $stmt5 = $conn->prepare("INSERT INTO user_medical_history (student_id, height, weight, blood_type, allergies, conditions, illness_history, current_medication, communicable, communicable_name, communicable_medication, mental_health, mental_health_name, mental_health_medication, physical, physical_name, physical_medication, last_med_checkup, menstrual_cycle, reproductive_issue, reproductive_specify, reproductive_medication, pregnant, last_checkup, due_date, physician_name, physician_contact) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        $stmt5->bind_param("ssissssssssssssssssssssssss", $student_id, $height, $weight, $blood_type, $allergies, $conditions, $illness_history, $current_medication, $communicable, $communicable_name, $communicable_medication, $mental_health, $mental_health_name, $mental_health_medication, $physical, $physical_name, $physical_medication, $last_med_checkup, $menstrual_cycle, $reproductive_issue, $reproductive_specify, $reproductive_medication, $pregnant, $last_checkup, $due_date, $physician_name, $physician_contact);
+        $stmt5->execute();
 
-        $sql6 = "INSERT INTO application_approvals (student_id, application_date, status) 
-                 VALUES ('$student_id', NOW(), 'Pending')";
-        $result6 = mysqli_query($conn, $sql6);
+        // Application Approvals
+        $stmt6 = $conn->prepare("INSERT INTO application_approvals (student_id, application_date, status) VALUES (?, NOW(), 'Pending')");
+        $stmt6->bind_param("s", $student_id);
+        $stmt6->execute();
 
-        if ($result2 && $result3 && $result4 && $result5 && $result6) {
-            header("Location: ../apply.php?success=Application submitted successfully. Waiting for approval.");
-            exit();
-        } else {
-            header("Location: ../apply.php?error=Error submitting application. Please try again.");
-            exit();
-        }
-    } else {
-        header("Location: ../apply.php?error=Error creating user. Please try again.");
+        mysqli_commit($conn);
+        header("Location: ../apply.php?success=Application submitted successfully. Waiting for approval.");
+        exit();
+    } catch (Exception $e) {
+        mysqli_rollback($conn);
+        header("Location: ../apply.php?error=Error submitting application: " . $e->getMessage());
         exit();
     }
 }
 
+
 // Update Information
 if (isset($_POST['updateProfile'])) {
-    // Personal Information
+
     $student_id = $_POST['student_id'];
     $full_name = $_POST['full_name'];
     $nickname = $_POST['nickname'];
@@ -188,7 +236,7 @@ if (isset($_POST['updateProfile'])) {
     $address = $_POST['address'];
     $email = $_POST['email'];
 
-    //Family Background
+    // Family
     $guardian_name = $_POST['guardian_name'];
     $guardian_contact = $_POST['guardian_contact'];
     $guardian_relation = $_POST['guardian_relation'];
@@ -199,30 +247,61 @@ if (isset($_POST['updateProfile'])) {
     $parent_income = $_POST['parent_income'];
     $siblings = $_POST['siblings'];
 
-    // Update Personal Information
-    $sql1 = "UPDATE user_personal_information SET full_name='$full_name', nickname='$nickname', contact='$contact', address='$address' WHERE student_id='$student_id'";
+    // ===== PROFILE PICTURE =====
+    $profile_picture_sql = "";
+
+    if (!empty($_FILES['profile_picture']['name'])) {
+        $file = $_FILES['profile_picture'];
+        $ext = pathinfo($file['name'], PATHINFO_EXTENSION);
+        $newName = "profile_" . $student_id . "_" . time() . "." . $ext;
+        $target = "../assets/profile_pictures/" . $newName;
+
+        if (move_uploaded_file($file['tmp_name'], $target)) {
+            $profile_picture_sql = ", profile_picture='$newName'";
+        } else {
+            header("Location: ../student/profile.php?error=Failed to upload profile picture.");
+            exit();
+        }
+    }
+
+    // Update Personal Info
+    $sql1 = "UPDATE user_personal_information 
+            SET full_name='$full_name',
+                nickname='$nickname',
+                contact='$contact',
+                address='$address'
+            WHERE student_id='$student_id'";
     $result1 = mysqli_query($conn, $sql1);
 
-    // Update Family Background
-    $sql2 = "UPDATE user_family_background SET guardian_name='$guardian_name', guardian_contact='$guardian_contact', guardian_relation='$guardian_relation', father_name='$father_name', father_contact='$father_contact', mother_name='$mother_name', mother_contact='$mother_contact', parent_income='$parent_income', siblings='$siblings' WHERE student_id='$student_id'";
+    // Update Family
+    $sql2 = "UPDATE user_family_background 
+            SET guardian_name='$guardian_name',
+                guardian_contact='$guardian_contact',
+                guardian_relation='$guardian_relation',
+                father_name='$father_name',
+                father_contact='$father_contact',
+                mother_name='$mother_name',
+                mother_contact='$mother_contact',
+                parent_income='$parent_income',
+                siblings='$siblings'
+            WHERE student_id='$student_id'";
     $result2 = mysqli_query($conn, $sql2);
 
     if ($result1 && $result2) {
-        // Update Email in Users Table
-        $sql3 = "UPDATE users SET email='$email' WHERE student_id='$student_id'";
+        $sql3 = "UPDATE users 
+                SET email='$email'
+                $profile_picture_sql
+                WHERE student_id='$student_id'";
         $result3 = mysqli_query($conn, $sql3);
 
         if ($result3) {
             header("Location: ../student/profile.php?success=Profile updated successfully.");
             exit();
-        } else {
-            header("Location: ../student/profile.php?error=Error updating email. Please try again.");
-            exit();
         }
-    } else {
-        header("Location: ../student/profile.php?error=Error updating profile. Please try again.");
-        exit();
     }
+
+    header("Location: ../student/profile.php?error=Error updating profile.");
+    exit();
 }
 
 // Update Password
