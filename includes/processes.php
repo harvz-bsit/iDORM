@@ -571,7 +571,7 @@ if (isset($_POST['approve_passlip'])) {
     // ENV
     $isLocal = ($_SERVER['HTTP_HOST'] === 'localhost');
     $baseUrl = $isLocal
-        ? "https://your-ngrok-link.ngrok-free.app"
+        ? "http://localhost/iDORM"
         : "https://idorm.ispsc.edu.ph";
 
     $verifyUrl = $baseUrl . "/verify_passlip.php?code=" . $userData['verification_code'];
