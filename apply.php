@@ -176,9 +176,7 @@ $error = $_GET['error'] ?? null;
                     <div class="col-md-4">
                         <label>Sex</label>
                         <select name="sex" class="form-control" required>
-                            <option value=""></option>
-                            <option>Male</option>
-                            <option>Female</option>
+                            <option selected>Female</option>
                         </select>
                     </div>
                     <div class="col-md-4">

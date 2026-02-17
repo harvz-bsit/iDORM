@@ -77,42 +77,54 @@ $announcementsResult = mysqli_query($conn, $announcementsQuery);
         ?>
             <div class="row g-4">
                 <div class="col-md-4">
-                    <div class="card dashboard-card text-center p-4 shadow-lg">
-                        <h5>🏠 Room</h5>
-                        <p class="fw-semibold mb-0">
-                            <?= $room ? 'Room ' . $room['room_number'] : 'Not Assigned'; ?>
-                        </p>
-                        <small class="text-muted">Ladies Dorm</small>
-                    </div>
+                    <a href="room-info.php" class="text-decoration-none">
+                        <div class="card dashboard-card text-center p-4 shadow-lg">
+                            <h5>🏠 Room</h5>
+                            <p class="fw-semibold mb-0">
+                                <?= $room ? 'Room ' . $room['room_number'] : 'Not Assigned'; ?>
+                            </p>
+                            <small class="text-muted">Ladies Dorm</small>
+                        </div>
+                    </a>
                 </div>
 
                 <div class="col-md-4">
-                    <div class="card dashboard-card text-center p-4 shadow-lg">
-                        <h5>💳 Payment Status</h5>
-                        <p class="fw-semibold m-0">
-                            <?php if ($payment && $payment['status'] === 'Approved'): ?>
-                                <span class="badge bg-success px-3 py-2">Paid</span>
-                            <?php else: ?>
-                                <span class="badge bg-danger px-3 py-2">Unpaid</span>
-                            <?php endif; ?>
-                        </p>
-                        <small class="text-muted m-0">
-                            <?= $payment ? date('F Y', strtotime($payment['month_paid'])) : 'No record'; ?>
-                        </small>
+                    <a href="payments.php" class="text-decoration-none">
+                        <div class="card dashboard-card text-center p-4 shadow-lg">
+                            <h5>💳 Payment Status</h5>
+                            <p class="fw-semibold m-0">
+                                <?php if ($payment && $payment['status'] === 'Approved'): ?>
+                                    <span class="badge bg-success px-3 py-2">Paid</span>
+                                <?php else: ?>
+                                    <span class="badge bg-danger px-3 py-2">Unpaid</span>
+                                <?php endif; ?>
+                            </p>
+                            <small class="text-muted m-0">
+                                <?= $payment ? date('F Y', strtotime($payment['month_paid'])) : 'No record'; ?>
+                            </small>
 
-                    </div>
+                        </div>
+                    </a>
                 </div>
 
                 <div class="col-md-4">
-                    <div class="card dashboard-card text-center p-4 shadow-lg">
-                        <h5>📅 Next Due</h5>
-                        <p class="fw-semibold mb-0">
-                            <?= //+1 
-                            $payment ? date_modify(new DateTime($payment['month_paid']), '+1 month')->format('F Y') : '—';
-                            ?>
-                        </p>
-                        <small class="text-muted">Mark your calendar</small>
-                    </div>
+                    <a href="payments.php" class="text-decoration-none">
+                        <div class="card dashboard-card text-center p-4 shadow-lg">
+                            <h5>📅 Next Due</h5>
+                            <p class="fw-semibold mb-0">
+                                <?php
+                                if ($payment) {
+                                    $nextDue = new DateTime($payment['month_paid']);
+                                    $nextDue->modify('+1 month');
+                                    echo $nextDue->format('F Y');
+                                } else {
+                                    echo '—';
+                                }
+                                ?>
+                            </p>
+                            <small class="text-muted">Mark your calendar</small>
+                        </div>
+                    </a>
                 </div>
             </div>
 
