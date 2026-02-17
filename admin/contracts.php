@@ -12,7 +12,7 @@ $query = "
 $result = mysqli_query($conn, $query);
 ?>
 
-<div class="container py-5 vh-100">
+<div class="container py-5 min-vh-100">
     <div class="dashboard-header">
         <h1 class="fw-bold text-maroon">
             <i class="bi bi-file-earmark-text"></i> Contracts
@@ -74,7 +74,7 @@ $result = mysqli_query($conn, $query);
                                 </td>
                                 <td>
                                     <div class="dropdown">
-                                        <button class="btn btn-outline-secondary btn-sm" type="button" data-bs-toggle="dropdown">
+                                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
                                             <i class="bi bi-three-dots-vertical"></i>
                                         </button>
                                         <ul class="dropdown-menu dropdown-menu-end">

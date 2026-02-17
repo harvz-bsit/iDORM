@@ -1,5 +1,5 @@
 <!-- ===== FOOTER ===== -->
-<footer class="footer text-white pt-5 pb-3 position-relative overflow-hidden">
+<footer class="footer text-white pt-5 pb-3 mt-4 position-relative overflow-hidden">
     <div class="footer-overlay"></div>
     <div class="container position-relative">
 

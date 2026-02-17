@@ -67,7 +67,7 @@ $result = mysqli_query($conn, "SELECT * FROM inventory ORDER BY id DESC");
                                 <td><?= htmlspecialchars($row['remarks']) ?></td>
                                 <td>
                                     <div class="dropdown">
-                                        <button class="btn btn-sm btn-link text-dark" data-bs-toggle="dropdown">
+                                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown">
                                             <i class="bi bi-three-dots-vertical"></i>
                                         </button>
                                         <ul class="dropdown-menu dropdown-menu-end">

@@ -3,7 +3,7 @@
     include 'includes/header.php';
     ?>
 
-    <div class="container py-5 vh-100">
+    <div class="container py-5 min-vh-100">
         <!-- Header -->
         <div class="dashboard-header">
             <h1><i class="bi bi-house-door"></i> Manage <span class="text-gold">Rooms</span></h1>
@@ -49,7 +49,7 @@
                                     ?></td>
                                 <td>
                                     <div class="dropdown">
-                                        <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="dropdown">
+                                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
                                             <i class="bi bi-three-dots-vertical"></i>
                                         </button>
                                         <ul class="dropdown-menu">

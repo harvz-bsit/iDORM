@@ -7,7 +7,7 @@ include '../config/conn.php';
 $result = $conn->query("SELECT * FROM application_approvals WHERE status='Pending'");
 ?>
 
-<div class="container py-5 vh-100">
+<div class="container py-5 min-vh-100">
     <div class="dashboard-header">
         <h1 class="fw-bold text-maroon">Manage Applications</h1>
         <p class="lead">Review, approve, or reject pending applications.</p>

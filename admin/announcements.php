@@ -44,7 +44,7 @@ include 'includes/header.php';
                                     <td><?php echo date('M d, Y', strtotime($row['date_posted'])); ?></td>
                                     <td>
                                         <div class="dropdown">
-                                            <button class="btn btn-sm btn-link text-dark" data-bs-toggle="dropdown">
+                                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown">
                                                 <i class="bi bi-three-dots-vertical"></i>
                                             </button>
                                             <ul class="dropdown-menu">

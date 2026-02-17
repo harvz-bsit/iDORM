@@ -72,7 +72,7 @@ $announcements = mysqli_query($conn, "
 ");
 ?>
 
-<div class="container py-5">
+<div class="container py-5 min-vh-100">
     <!-- Header -->
     <div class="dashboard-header">
         <h1>Welcome back, <span class="text-gold">Admin!</span> 👋</h1>
