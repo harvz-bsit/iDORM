@@ -189,6 +189,9 @@ include 'includes/header.php';
                                           JOIN user_personal_information u ON p.student_id = u.student_id
                                           ORDER BY p.id DESC";
                                 $result = mysqli_query($conn, $query);
+                                if (mysqli_num_rows($result) == 0) {
+                                    echo '<tr><td colspan="8" class="text-center text-muted">No passlips found.</td></tr>';
+                                } else {
                                 while ($row = mysqli_fetch_assoc($result)):
                                 ?>
                                     <tr>
@@ -217,7 +220,8 @@ include 'includes/header.php';
                                             <?php endif; ?>
                                         </td>
                                     </tr>
-                                <?php endwhile; ?>
+                                <?php endwhile; 
+                                }?>
                             </tbody>
                         </table>
                     </div>
