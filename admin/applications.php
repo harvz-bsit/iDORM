@@ -38,7 +38,7 @@ $result = $conn->query("SELECT * FROM application_approvals WHERE status='Pendin
             <table class="table table-hover align-middle">
                 <thead class="table-maroon text-white">
                     <tr>
-                        <th>#</th>
+                        <th>Student ID</th>
                         <th>Full Name</th>
                         <th>Email</th>
                         <th>Course</th>
@@ -71,7 +71,7 @@ $result = $conn->query("SELECT * FROM application_approvals WHERE status='Pendin
                             $edu_row = mysqli_fetch_assoc($edu_result);
                     ?>
                             <tr>
-                                <td><?= $count++ ?></td>
+                                <td><?= htmlspecialchars($student_id) ?></td>
                                 <td><?= htmlspecialchars($row_info['full_name']) ?></td>
                                 <td><?= htmlspecialchars($email_row['email']) ?></td>
                                 <td><?= htmlspecialchars($edu_row['course']) ?></td>
@@ -131,70 +131,75 @@ $result = $conn->query("SELECT * FROM application_approvals WHERE status='Pendin
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
-    document.querySelectorAll('.viewBtn').forEach(button => {
-        button.addEventListener('click', function() {
-            const studentId = this.dataset.id;
-            document.getElementById('modalContent').innerHTML = `
-            <div class="text-center text-muted py-4">
-                <div class="spinner-border text-maroon" role="status"></div>
-                <p class="mt-2">Loading applicant details...</p>
-            </div>
-        `;
-            document.getElementById('approveBtn').setAttribute('data-id', studentId);
-            document.getElementById('rejectBtn').setAttribute('data-id', studentId);
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.viewBtn').forEach(button => {
+            button.addEventListener('click', function() {
+                const studentId = this.dataset.id;
+                console.log(studentId);
+                document.getElementById('modalContent').innerHTML = `
+                <div class="text-center text-muted py-4">
+                    <div class="spinner-border text-maroon" role="status"></div>
+                    <p class="mt-2">Loading applicant details...</p>
+                </div>
+            `;
+                document.getElementById('approveBtn').setAttribute('data-id', studentId);
+                document.getElementById('rejectBtn').setAttribute('data-id', studentId);
 
-            fetch('fetch_applicant.php?id=' + studentId)
-                .then(response => response.text())
-                .then(data => {
-                    document.getElementById('modalContent').innerHTML = data;
-                });
+                fetch('fetch_applicant.php?id=' + studentId)
+                    .then(response => response.text())
+                    .then(data => {
+                        document.getElementById('modalContent').innerHTML = data;
+                    }); 
+            });
         });
     });
 
     // Handle Approve / Reject Actions
-    ['approveBtn', 'rejectBtn'].forEach(btnId => {
-        document.getElementById(btnId).addEventListener('click', function() {
-            const studentId = this.dataset.id;
-            const action = btnId === 'approveBtn' ? 'approve' : 'reject';
-            const confirmText = action === 'approve' ? 'approve this applicant' : 'reject this applicant';
+    document.addEventListener('DOMContentLoaded', function() {
+        ['approveBtn', 'rejectBtn'].forEach(btnId => {
+            document.getElementById(btnId).addEventListener('click', function() {
+                const studentId = this.dataset.id;
+                const action = btnId === 'approveBtn' ? 'approve' : 'reject';
+                const confirmText = action === 'approve' ? 'approve this applicant' : 'reject this applicant';
 
-            Swal.fire({
-                title: 'Are you sure?',
-                text: `You are about to ${confirmText}.`,
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonColor: action === 'approve' ? '#198754' : '#dc3545',
-                cancelButtonColor: '#6c757d',
-                confirmButtonText: `Yes, ${action}`,
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    fetch('../includes/approval_action.php', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/x-www-form-urlencoded'
-                            },
-                            body: new URLSearchParams({
-                                action,
-                                student_id: studentId
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: `You are about to ${confirmText}.`,
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: action === 'approve' ? '#198754' : '#dc3545',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: `Yes, ${action}`,
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        fetch('../includes/approval_action.php', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/x-www-form-urlencoded'
+                                },
+                                body: new URLSearchParams({
+                                    action,
+                                    student_id: studentId
+                                })
                             })
-                        })
-                        .then(res => res.json())
-                        .then(data => {
-                            if (data.status === 'success') {
-                                Swal.fire({
-                                    title: 'Success!',
-                                    text: data.message,
-                                    icon: 'success',
-                                    showConfirmButton: false,
-                                    timer: 1500
-                                }).then(() => {
-                                    location.reload();
-                                });
-                            } else {
-                                Swal.fire('Error', data.message, 'error');
-                            }
-                        });
-                }
+                            .then(res => res.json())
+                            .then(data => {
+                                if (data.status === 'success') {
+                                    Swal.fire({
+                                        title: 'Success!',
+                                        text: data.message,
+                                        icon: 'success',
+                                        showConfirmButton: false,
+                                        timer: 1500
+                                    }).then(() => {
+                                        location.reload();
+                                    });
+                                } else {
+                                    Swal.fire('Error', data.message, 'error');
+                                }
+                            });
+                    }
+                });
             });
         });
     });

@@ -5,12 +5,14 @@ include '../config/conn.php';
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
+use function Safe\json_encode;
+
 header('Content-Type: application/json');
 
 if (isset($_POST['action']) && isset($_POST['student_id'])) {
 
     $action = $_POST['action'];
-    $id = intval($_POST['student_id']);
+    $id = $_POST['student_id'];
 
     if ($action === 'approve') {
         $status = 'Approved';
@@ -23,7 +25,7 @@ if (isset($_POST['action']) && isset($_POST['student_id'])) {
 
     // Update status
     $query = $conn->prepare("UPDATE application_approvals SET status = ? WHERE student_id = ?");
-    $query->bind_param("si", $status, $id);
+    $query->bind_param("ss", $status, $id);
 
     if ($query->execute()) {
 
@@ -44,7 +46,7 @@ if (isset($_POST['action']) && isset($_POST['student_id'])) {
               ON u.student_id = upi.student_id
             WHERE u.student_id = ?
         ");
-        $emailQuery->bind_param("i", $id);
+        $emailQuery->bind_param("s", $id);
         $emailQuery->execute();
         $emailResult = $emailQuery->get_result();
 

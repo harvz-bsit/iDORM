@@ -2,32 +2,32 @@
 include '../config/conn.php';
 
 if (isset($_GET['id'])) {
-    $id = intval($_GET['id']);
-    $query = $conn->query("SELECT * FROM application_approvals WHERE student_id = $id");
+    $id = $_GET['id'];
+    $query = $conn->query("SELECT * FROM application_approvals WHERE student_id = '$id'");
     $row = $query->fetch_assoc();
 
     // Fetch personal information
-    $query = "SELECT * FROM user_personal_information WHERE student_id=$id";
+    $query = "SELECT * FROM user_personal_information WHERE student_id='$id'";
     $result_info = mysqli_query($conn, $query);
     $row_info = mysqli_fetch_assoc($result_info);
 
     // Fetch email
-    $email_query = "SELECT email FROM users WHERE student_id=$id";
+    $email_query = "SELECT * FROM users WHERE student_id='$id'";
     $email_result = mysqli_query($conn, $email_query);
     $email_row = mysqli_fetch_assoc($email_result);
 
     // Fetch Medical History
-    $med_query = "SELECT * FROM user_medical_history WHERE student_id=$id";
+    $med_query = "SELECT * FROM user_medical_history WHERE student_id='$id'";
     $med_result = mysqli_query($conn, $med_query);
     $med_row = mysqli_fetch_assoc($med_result);
 
     // Fetch Family Background
-    $fam_query = "SELECT * FROM user_family_background WHERE student_id=$id";
+    $fam_query = "SELECT * FROM user_family_background WHERE student_id='$id'";
     $fam_result = mysqli_query($conn, $fam_query);
     $fam_row = mysqli_fetch_assoc($fam_result);
 
     // Fetch Educational Background
-    $edu_query = "SELECT * FROM user_educational_background WHERE student_id=$id";
+    $edu_query = "SELECT * FROM user_educational_background WHERE student_id='$id'";
     $edu_result = mysqli_query($conn, $edu_query);
     $edu_row = mysqli_fetch_assoc($edu_result);
 
@@ -38,7 +38,7 @@ if (isset($_GET['id'])) {
 ?>
     <div class="row g-3 mt-1">
         <h5 class="fw-bold text-maroon mb-1">Personal Information</h5>
-
+        <p><?php echo $id?></p>
         <div class="col-md-6 border border-dark m-0">
             <label class="fw-semibold text-maroon">Full Name:</label>
             <p><?= htmlspecialchars($row_info['full_name']) ?></p>
