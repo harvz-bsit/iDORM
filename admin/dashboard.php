@@ -83,39 +83,47 @@ $announcements = mysqli_query($conn, "
     <!-- ======= Dashboard Cards ======= -->
     <div class="row g-4">
         <div class="col-md-3">
-            <div class="dashboard-card h-100 p-4 text-center shadow-sm">
-                <i class="bi bi-door-open display-5 text-success mb-2"></i>
-                <h5 class="fw-semibold text-maroon">Available Slots</h5>
-                <h2 class="fw-bold text-dark"><?php echo $available_slots; ?></h2>
-                <p class="text-muted mb-0">Rooms ready for occupancy</p>
-            </div>
+            <a href="rooms.php" class="text-decoration-none">
+                <div class="dashboard-card h-100 p-4 text-center shadow-sm">
+                    <i class="bi bi-door-open display-5 text-success mb-2"></i>
+                    <h5 class="fw-semibold text-maroon">Available Slots</h5>
+                    <h2 class="fw-bold text-dark"><?php echo $available_slots; ?></h2>
+                    <p class="text-muted mb-0">Rooms ready for occupancy</p>
+                </div>
+            </a>
         </div>
 
         <div class="col-md-3">
-            <div class="dashboard-card h-100 p-4 text-center shadow-sm">
-                <i class="bi bi-house-door display-5 text-primary mb-2"></i>
-                <h5 class="fw-semibold text-maroon">Occupied Rooms</h5>
-                <h2 class="fw-bold text-dark"><?php echo $total_occupied; ?></h2>
-                <p class="text-muted mb-0">Currently assigned</p>
-            </div>
+            <a href="rooms.php" class="text-decoration-none">
+                <div class="dashboard-card h-100 p-4 text-center shadow-sm">
+                    <i class="bi bi-house-door display-5 text-primary mb-2"></i>
+                    <h5 class="fw-semibold text-maroon">Occupied Rooms</h5>
+                    <h2 class="fw-bold text-dark"><?php echo $total_occupied; ?></h2>
+                    <p class="text-muted mb-0">Currently assigned</p>
+                </div>
+            </a>
         </div>
 
         <div class="col-md-3">
-            <div class="dashboard-card h-100 p-4 text-center shadow-sm">
-                <i class="bi bi-person-check display-5 text-warning mb-2"></i>
-                <h5 class="fw-semibold text-maroon">Pending Approvals</h5>
-                <h2 class="fw-bold text-dark"><?php echo $pending_approvals; ?></h2>
-                <p class="text-muted mb-0">Applicants waiting review</p>
-            </div>
+            <a href="applications.php" class="text-decoration-none">
+                <div class="dashboard-card h-100 p-4 text-center shadow-sm">
+                    <i class="bi bi-person-check display-5 text-warning mb-2"></i>
+                    <h5 class="fw-semibold text-maroon">Pending Approvals</h5>
+                    <h2 class="fw-bold text-dark"><?php echo $pending_approvals; ?></h2>
+                    <p class="text-muted mb-0">Applicants waiting review</p>
+                </div>
+            </a>
         </div>
 
         <div class="col-md-3">
-            <div class="dashboard-card h-100 p-4 text-center shadow-sm">
-                <i class="bi bi-cash-stack display-5 text-danger mb-2"></i>
-                <h5 class="fw-semibold text-maroon">Outstanding Payments</h5>
-                <h2 class="fw-bold text-dark">₱<?php echo number_format($outstanding_amount, 2); ?></h2>
-                <p class="text-muted mb-0">Unverified receipts</p>
-            </div>
+            <a href="payments.php" class="text-decoration-none">
+                <div class="dashboard-card h-100 p-4 text-center shadow-sm">
+                    <i class="bi bi-cash-stack display-5 text-danger mb-2"></i>
+                    <h5 class="fw-semibold text-maroon">Outstanding Payments</h5>
+                    <h2 class="fw-bold text-dark">₱<?php echo number_format($outstanding_amount, 2); ?></h2>
+                    <p class="text-muted mb-0">Unverified receipts</p>
+                </div>
+            </a>
         </div>
     </div>
 

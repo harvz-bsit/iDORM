@@ -470,6 +470,12 @@ if (isset($_POST['updateContract'])) {
     $id = $_POST['contract_id'];
     $status = $_POST['status'];
 
+    $check_checkout = "SELECT * FROM checkouts WHERE contract_id = '$id'";
+    $res = mysqli_query($conn, $check_checkout);
+    if ((mysqli_num_rows($res) === 1) && ($status === "Signed")) {
+        $update_checkout = mysqli_query($conn, "DELETE FROM checkouts WHERE contract_id = '$id'");
+    }
+
     mysqli_query($conn, "UPDATE contracts SET status='$status' WHERE id='$id'");
     header("Location: ../admin/contracts.php");
     exit;
@@ -987,6 +993,17 @@ if ($action === 'preview_report') {
     exit;
 }
 
+function formatHeader($header)
+{
+    // Replace underscores with spaces
+    $header = str_replace('_', ' ', $header);
+
+    // Convert to Title Case
+    $header = ucwords($header);
+
+    return $header;
+}
+
 /* ---------------- DOWNLOAD ---------------- */
 if ($action === 'download_report') {
     $type = $_GET['type'];
@@ -1003,7 +1020,8 @@ if ($action === 'download_report') {
         $out = fopen("php://output", "w");
 
         $first = mysqli_fetch_assoc($result);
-        fputcsv($out, array_keys($first));
+        $formattedHeaders = array_map('formatHeader', array_keys($first));
+        fputcsv($out, $formattedHeaders);
         fputcsv($out, $first);
 
         while ($row = mysqli_fetch_assoc($result)) {
@@ -1014,27 +1032,105 @@ if ($action === 'download_report') {
     }
 
     if ($format === 'pdf') {
-        $html = "<h2 style='text-align:center;'>" . ucfirst($type) . " Report</h2><table border='1' width='100%'><tr>";
-        $first = mysqli_fetch_assoc($result);
-        foreach (array_keys($first) as $h) {
-            $html .= "<th>$h</th>";
+
+        // Check if there are results
+        if (mysqli_num_rows($result) == 0) {
+            die("No records found.");
         }
+
+        // Fetch first row
+        $first = mysqli_fetch_assoc($result);
+
+        $imagePath = __DIR__ . "/../assets/img/contract_header.png";
+
+        if (!file_exists($imagePath)) {
+            die("Image not found: " . $imagePath);
+        }
+
+        $imageType = pathinfo($imagePath, PATHINFO_EXTENSION);
+        $imageData = file_get_contents($imagePath);
+        $base64Image = 'data:image/' . $imageType . ';base64,' . base64_encode($imageData);
+
+        // Start HTML
+        $html = "
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+            margin: 0;
+        }
+
+        .contract-header img {
+            width: 100%;
+            object-fit: contain;
+        }
+
+        h2 {
+            text-align: center;
+            margin: 15px 0 20px 0;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        th {
+            background-color: #800000;
+            color: #ffffff;
+            padding: 6px;
+            text-align: left;
+        }
+
+        td {
+            padding: 10px;
+        }
+    </style>
+
+    <div class='contract-header'>
+        <img src='{$base64Image}'>
+    </div>
+
+    <h2>" . ucfirst($type) . " Report</h2>
+
+    <table border='1'>
+    <tr>";
+
+        // Column Headers (Formatted)
+        foreach (array_keys($first) as $h) {
+            $html .= "<th>" . formatHeader($h) . "</th>";
+        }
+
         $html .= "</tr><tr>";
-        foreach ($first as $v) $html .= "<td>$v</td>";
+
+        // First Row
+        foreach ($first as $v) {
+            $html .= "<td>{$v}</td>";
+        }
+
         $html .= "</tr>";
 
+        // Remaining Rows
         while ($row = mysqli_fetch_assoc($result)) {
             $html .= "<tr>";
-            foreach ($row as $v) $html .= "<td>$v</td>";
+            foreach ($row as $v) {
+                $html .= "<td>{$v}</td>";
+            }
             $html .= "</tr>";
         }
+
         $html .= "</table>";
 
-        $dompdf = new Dompdf();
+        // Dompdf Options
+        $options = new \Dompdf\Options();
+        $options->set('isRemoteEnabled', true);
+
+        $dompdf = new Dompdf($options);
         $dompdf->loadHtml($html);
         $dompdf->setPaper('A4', 'landscape');
         $dompdf->render();
         $dompdf->stream("{$type}_report.pdf", ["Attachment" => true]);
+
         exit;
     }
 }
@@ -1125,4 +1221,83 @@ if ($action === 'delete_inventory') {
     mysqli_query($conn, "DELETE FROM inventory WHERE id = '$id'");
     echo json_encode(['status' => 'success']);
     exit;
+}
+
+if (isset($_POST['processCheckout'])) {
+    $contract_id       = $_POST['contract_id'];
+    $checkout_room     = $_POST['checkout_room'];
+    $checkout_date     = $_POST['checkout_date'];
+    $checkout_time     = $_POST['checkout_time'];
+    $new_contact       = $_POST['new_contact'];
+    $home_address      = $_POST['home_address'];
+    $outstanding_fees  = $_POST['outstanding_fees'] ?: 0;
+    $damage_charges    = $_POST['damage_charges'] ?: 0;
+    $total_due         = $_POST['total_due'] ?: 0;
+    $reason_array      = $_POST['reason'] ?? [];
+    $reason_text       = implode(", ", $reason_array); // convert checkbox array to string
+    $approved_by       = "Cristine Joy O. Pera, MSCJ"; // static, or pull dynamically
+
+    // Get student_id from contract
+    $query = mysqli_query($conn, "SELECT student_id FROM contracts WHERE id='$contract_id'");
+    $row = mysqli_fetch_assoc($query);
+    $student_id = $row['student_id'];
+
+    // 1️⃣ Update contract status
+    $update_contract = mysqli_query($conn, "
+        UPDATE contracts
+        SET status='Checked Out'
+        WHERE id='$contract_id'
+    ");
+
+    // Remove Student from room
+    $delete_student_room = mysqli_query($conn, "
+        DELETE FROM room_assignments 
+        WHERE student_id = '$student_id'
+    ");
+
+    // Update room count
+    $select_current_count = mysqli_query($conn, "
+     SELECT occupied 
+     FROM rooms
+     WHERE room_number = '$checkout_room'
+ ");
+
+    if ($select_current_count && mysqli_num_rows($select_current_count) > 0) {
+        $row = mysqli_fetch_assoc($select_current_count);
+        $current_occupied = (int)$row['occupied'];
+
+        // Decrement occupied count but don't go below 0
+        $new_occupied = max(0, $current_occupied - 1);
+
+        // Update the rooms table
+        $update_room_count = mysqli_query($conn, "
+         UPDATE rooms
+         SET occupied = '$new_occupied'
+         WHERE room_number = '$checkout_room'
+     ");
+
+        if (!$update_room_count) {
+            $_SESSION['error'] = "Failed to update room occupancy: " . mysqli_error($conn);
+        }
+    } else {
+        $_SESSION['error'] = "Room not found: $checkout_room";
+    }
+
+    // 2️⃣ Insert into checkouts table
+    $insert_checkout = mysqli_query($conn, "
+        INSERT INTO checkouts 
+        (contract_id, student_id, checkout_date, checkout_time, checkout_room new_contact, home_address, reason, outstanding_fees, damage_charges, total_due, approved_by)
+        VALUES
+        ('$contract_id', '$student_id', '$checkout_date', '$checkout_time', '$checkout_room', '$new_contact', '" . mysqli_real_escape_string($conn, $home_address) . "', '" . mysqli_real_escape_string($conn, $reason_text) . "', '$outstanding_fees', '$damage_charges', '$total_due', '$approved_by')
+    ");
+
+    if ($update_contract && $insert_checkout) {
+        $_SESSION['success'] = "Student checked out successfully.";
+        header("Location: ../admin/contracts.php");
+        exit;
+    } else {
+        $_SESSION['error'] = "Something went wrong: " . mysqli_error($conn);
+        header("Location: ../admin/contracts.php");
+        exit;
+    }
 }

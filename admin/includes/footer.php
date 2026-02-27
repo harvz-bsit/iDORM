@@ -19,11 +19,11 @@
             <div class="col-md-4">
                 <h6 class="fw-bold text-gold mb-3">Quick Links</h6>
                 <ul class="list-unstyled small mb-0">
-                    <li><a href="#" class="footer-link">Dashboard</a></li>
-                    <li><a href="#" class="footer-link">Payments</a></li>
-                    <li><a href="#" class="footer-link">Room Info</a></li>
-                    <li><a href="#" class="footer-link">Announcements</a></li>
-                    <li><a href="#" class="footer-link">Profile</a></li>
+                    <li><a href="dashboard.php" class="footer-link">Dashboard</a></li>
+                    <li><a href="applications.php" class="footer-link">Applications</a></li>
+                    <li><a href="contracts.php" class="footer-link">Contracts</a></li>
+                    <li><a href="inventory.php" class="footer-link">Inventory</a></li>
+                    <li><a href="reports.php" class="footer-link">Reports</a></li>
                 </ul>
             </div>
 

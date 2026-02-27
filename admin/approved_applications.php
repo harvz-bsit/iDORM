@@ -6,7 +6,6 @@ include '../config/conn.php';
 // Fetch pending applicants
 $result = $conn->query("SELECT * FROM application_approvals WHERE status='Approved'");
 ?>
-
 <div class="container py-5 vh-100">
     <div class="dashboard-header">
         <h1 class="fw-bold text-maroon">Approved Applications</h1>
@@ -121,6 +120,11 @@ $result = $conn->query("SELECT * FROM application_approvals WHERE status='Approv
             </div>
             <div class="modal-footer">
                 <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+
+                <button class="btn btn-outline-dark" id="printBtn">
+                    <i class="bi bi-printer"></i> Print
+                </button>
+
                 <button class="btn btn-success" id="approveBtn">Approve</button>
                 <button class="btn btn-danger" id="rejectBtn">Reject</button>
             </div>
@@ -129,7 +133,72 @@ $result = $conn->query("SELECT * FROM application_approvals WHERE status='Approv
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    document.getElementById('printBtn').addEventListener('click', function() {
 
+        const modalContent = document.getElementById('modalContent').innerHTML;
+
+        const printWindow = window.open('', '', 'height=900,width=1000');
+
+        printWindow.document.write(`
+        <html>
+        <head>
+            <title>Applicant Details</title>
+            <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+            <style>
+                body {
+                    padding: 40px;
+                    font-family: Arial, sans-serif;
+                }
+
+                .contract-header img {
+                    width: 100%;
+                    max-height: 140px;
+                    object-fit: contain;
+                }
+
+                h4 {
+                    text-align: center;
+                    font-weight: bold;
+                    margin-top: 20px;
+                    margin-bottom: 30px;
+                }
+
+                table {
+                    width: 100%;
+                }
+
+                th {
+                    width: 30%;
+                    background-color: #f8f9fa;
+                }
+
+                @media print {
+                    body {
+                        margin: 0;
+                    }
+                }
+            </style>
+        </head>
+        <body>
+
+            <div class="contract-header mb-1">
+                <img src="../assets/img/contract_header.png" alt="Contract Header">
+            </div>
+
+            <h4>APPLICANT DETAILS</h4>
+            <small>Application Status: Approved</small>
+            ${modalContent}
+
+        </body>
+        </html>
+    `);
+
+        printWindow.document.close();
+        printWindow.focus();
+        printWindow.print();
+    });
+</script>
 <script>
     document.querySelectorAll('.viewBtn').forEach(button => {
         button.addEventListener('click', function() {

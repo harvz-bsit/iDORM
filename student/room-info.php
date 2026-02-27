@@ -59,20 +59,22 @@ include 'includes/header.php';
                             <ul class="list-group list-group-flush small">
                                 <?php
                                 if ($room_row) {
-                                    $getroommates = "SELECT sa.student_id, s.full_name FROM room_assignments sa 
-                                        JOIN user_personal_information s ON sa.student_id = s.id 
-                                        WHERE sa.room_num = '$room_number' AND sa.student_id != '$student_id'";
+                                    $getroommates = "
+        SELECT sa.student_id, s.full_name 
+        FROM room_assignments sa 
+        JOIN user_personal_information s ON sa.student_id = s.student_id
+        WHERE sa.room_num = '$room_number' AND sa.student_id != '$student_id'
+        ORDER BY s.full_name ASC
+    ";
                                     $roommates_result = mysqli_query($conn, $getroommates);
                                     if (mysqli_num_rows($roommates_result) == 0) {
                                         echo "<li class='list-group-item text-muted'>No roommates assigned.</li>";
-                                    }
-                                    while ($roommate = mysqli_fetch_assoc($roommates_result)) {
-                                ?>
-                                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                                            <span><i class="bi bi-person-fill text-maroon me-2"></i> <?php echo $roommate['full_name']; ?></span>
-                                            <span class="text-muted"><?php echo $roommate['student_id']; ?></span>
-                                        </li>
-                                <?php
+                                    } else {
+                                        while ($roommate = mysqli_fetch_assoc($roommates_result)) {
+                                            echo "<li class='list-group-item'>
+                    <i class='bi bi-person-fill text-maroon me-2'></i> " . htmlspecialchars(ucwords($roommate['full_name'])) . "
+                  </li>";
+                                        }
                                     }
                                 }
                                 ?>

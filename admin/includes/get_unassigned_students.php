@@ -20,7 +20,9 @@ $query = "
     INNER JOIN user_personal_information p ON u.student_id = p.student_id
     INNER JOIN user_educational_background e ON u.student_id = e.student_id
     LEFT JOIN room_assignments r ON u.student_id = r.student_id
-    WHERE u.role='student' AND r.student_id IS NULL
+    WHERE u.role='student'
+      AND r.student_id IS NULL
+      AND u.student_id NOT IN (SELECT student_id FROM checkouts)
 ";
 
 $result = mysqli_query($conn, $query);

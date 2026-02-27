@@ -38,7 +38,6 @@ if (isset($_GET['id'])) {
 ?>
     <div class="row g-3 mt-1">
         <h5 class="fw-bold text-maroon mb-1">Personal Information</h5>
-        <p><?php echo $id?></p>
         <div class="col-md-6 border border-dark m-0">
             <label class="fw-semibold text-maroon">Full Name:</label>
             <p><?= htmlspecialchars($row_info['full_name']) ?></p>
