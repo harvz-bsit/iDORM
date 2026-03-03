@@ -51,6 +51,7 @@ $announcementsResult = mysqli_query($conn, $announcementsQuery);
         <h1>Welcome back, <span class="text-gold"><?php echo $personalInfoRow['full_name']; ?></span> 👋</h1>
         <p class="lead">Here’s your dormitory overview at ISPSC Main Campus.</p>
         <div class="divider"></div>
+        <a href="check-out.php" class="btn btn-sm btn-outline-danger">Check Out</a>
     </div>
 
     <?php

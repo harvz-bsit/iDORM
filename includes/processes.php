@@ -535,7 +535,7 @@ if (isset($_POST['subject']) && isset($_POST['details']) && isset($_POST['studen
     exit;
 }
 
-if ($_GET['action'] === 'upload_receipt') {
+if (isset($_GET['action']) && $_GET['action'] === 'upload_receipt') {
     $student_id = $_POST['student_id'] ?? 0;
     $month_paid = $_POST['month_paid'] ?? '';
     $amount = $_POST['amount'] ?? '';
@@ -572,7 +572,7 @@ if ($_GET['action'] === 'upload_receipt') {
     exit;
 }
 
-if ($_GET['action'] === 'update_receipt_status') {
+if (isset($_GET['action']) && $_GET['action'] === 'update_receipt_status') {
     $input = json_decode(file_get_contents('php://input'), true);
     $id = $input['id'] ?? 0;
     $status = $input['status'] ?? '';
@@ -1139,35 +1139,63 @@ if ($action === 'download_report') {
 function buildReportQuery($type, $status, $month, $forDownload)
 {
     switch ($type) {
+
         case 'students':
-            return "SELECT student_id, full_name, address, contact FROM user_personal_information";
+            return "SELECT student_id, full_name, address, contact 
+                    FROM user_personal_information";
 
         case 'payments':
-            $q = "SELECT student_id, month_paid, status FROM payment_receipts WHERE 1";
-            if ($status) $q .= " AND status='$status'";
-            if ($month) $q .= " AND month_paid LIKE '%$month%'";
+            $q = "SELECT p.student_id, u.full_name, p.month_paid, p.status 
+                  FROM payment_receipts p
+                  JOIN user_personal_information u 
+                      ON p.student_id = u.student_id
+                  WHERE 1";
+            if ($status) $q .= " AND p.status='$status'";
+            if ($month) $q .= " AND p.month_paid LIKE '%$month%'";
             return $q;
 
         case 'passlips':
-            $q = "SELECT student_id, destination, purpose, departure_date, return_date, status FROM passlips WHERE 1";
-            if ($status) $q .= " AND status='$status'";
+            $q = "SELECT ps.student_id, u.full_name, ps.destination, 
+                         ps.purpose, ps.departure_date, ps.return_date, ps.status 
+                  FROM passlips ps
+                  JOIN user_personal_information u 
+                      ON ps.student_id = u.student_id
+                  WHERE 1";
+            if ($status) $q .= " AND ps.status='$status'";
             return $q;
 
         case 'rooms':
-            return "SELECT room_number, capacity, current_occupants FROM rooms";
+            $q = "SELECT r.room_number,
+                 r.capacity,
+                 COUNT(ra.student_id) AS occupants,
+                 GROUP_CONCAT(u.full_name SEPARATOR '<br>') AS occupant_names
+          FROM rooms r
+          LEFT JOIN room_assignments ra 
+                 ON r.room_number = ra.room_num
+          LEFT JOIN user_personal_information u
+                 ON ra.student_id = u.student_id
+          GROUP BY r.room_number, r.capacity";
+            return $q;
 
         case 'contracts':
-            $q = "SELECT student_id, status, signed_at FROM contracts WHERE 1";
-            if ($status) $q .= " AND status='$status'";
+            $q = "SELECT c.student_id, u.full_name, c.status, c.signed_at 
+                  FROM contracts c
+                  JOIN user_personal_information u 
+                      ON c.student_id = u.student_id
+                  WHERE 1";
+            if ($status) $q .= " AND c.status='$status'";
             return $q;
 
         case 'applications':
-            $q = "SELECT student_id, status, date_updated FROM application_approvals WHERE 1";
-            if ($status) $q .= " AND status='$status'";
+            $q = "SELECT a.student_id, u.full_name, a.status, a.date_updated 
+                  FROM application_approvals a
+                  JOIN user_personal_information u 
+                      ON a.student_id = u.student_id
+                  WHERE 1";
+            if ($status) $q .= " AND a.status='$status'";
             return $q;
-    };
-};
-
+    }
+}
 // ================= INVENTORY =================
 if ($action === 'add_inventory') {
     $item_name = $_POST['item_name'];
@@ -1228,7 +1256,6 @@ if (isset($_POST['processCheckout'])) {
     $checkout_room     = $_POST['checkout_room'];
     $checkout_date     = $_POST['checkout_date'];
     $checkout_time     = $_POST['checkout_time'];
-    $new_contact       = $_POST['new_contact'];
     $home_address      = $_POST['home_address'];
     $outstanding_fees  = $_POST['outstanding_fees'] ?: 0;
     $damage_charges    = $_POST['damage_charges'] ?: 0;
@@ -1286,9 +1313,9 @@ if (isset($_POST['processCheckout'])) {
     // 2️⃣ Insert into checkouts table
     $insert_checkout = mysqli_query($conn, "
         INSERT INTO checkouts 
-        (contract_id, student_id, checkout_date, checkout_time, checkout_room new_contact, home_address, reason, outstanding_fees, damage_charges, total_due, approved_by)
+        (contract_id, student_id, checkout_date, checkout_time, checkout_room, home_address, reason, outstanding_fees, damage_charges, total_due)
         VALUES
-        ('$contract_id', '$student_id', '$checkout_date', '$checkout_time', '$checkout_room', '$new_contact', '" . mysqli_real_escape_string($conn, $home_address) . "', '" . mysqli_real_escape_string($conn, $reason_text) . "', '$outstanding_fees', '$damage_charges', '$total_due', '$approved_by')
+        ('$contract_id', '$student_id', '$checkout_date', '$checkout_time', '$checkout_room', '" . mysqli_real_escape_string($conn, $home_address) . "', '" . mysqli_real_escape_string($conn, $reason_text) . "', '$outstanding_fees', '$damage_charges', '$total_due')
     ");
 
     if ($update_contract && $insert_checkout) {
@@ -1300,4 +1327,50 @@ if (isset($_POST['processCheckout'])) {
         header("Location: ../admin/contracts.php");
         exit;
     }
+}
+
+if (isset($_POST['approve_checkout'])) {
+    $checkoutId = $_POST['checkout_id'];
+
+    // 1️⃣ Fetch the checkout request details
+    $query = "SELECT student_id, checkout_room FROM checkouts WHERE id = '$checkoutId' LIMIT 1";
+    $result = mysqli_query($conn, $query);
+    if (!$result || mysqli_num_rows($result) === 0) {
+        die("Check-out request not found.");
+    }
+
+    $checkout = mysqli_fetch_assoc($result);
+    $studentId = $checkout['student_id'];
+    $roomNum = $checkout['room_num'];
+
+    // 2️⃣ Approve the checkout by setting approved_at
+    $approveQuery = "UPDATE checkouts SET approved_at = NOW() WHERE id = '$checkoutId'";
+    mysqli_query($conn, $approveQuery);
+
+    // 3️⃣ Remove student from room assignments
+    if ($roomNum) {
+        $deleteAssignment = "DELETE FROM room_assignments WHERE student_id = '$studentId' AND room_num = '$roomNum'";
+        mysqli_query($conn, $deleteAssignment);
+
+        // 4️⃣ Update room occupied count
+        $updateRoom = "UPDATE rooms 
+                       SET occupied = GREATEST(occupied - 1, 0) 
+                       WHERE room_number = '$roomNum'";
+        mysqli_query($conn, $updateRoom);
+    }
+
+    // 5️⃣ Redirect back to the requests page
+    header("Location: ../admin/requests.php?approved=1");
+    exit;
+}
+
+// REJECT
+if (isset($_POST['reject_checkout'])) {
+    $checkoutId = $_POST['checkout_id'];
+
+    // Simply delete the check-out request
+    mysqli_query($conn, "DELETE FROM checkouts WHERE id = '$checkoutId'");
+
+    header("Location: ../admin/requests.php?approved=1");
+    exit;
 }

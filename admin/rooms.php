@@ -348,6 +348,7 @@
                         .then(res => res.text())
                         .then(html => {
                             document.getElementById('occupants').innerHTML = html;
+                            window.location.reload();
                         });
                 });
         });

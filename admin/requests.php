@@ -41,6 +41,9 @@ include 'includes/header.php';
         <li class="nav-item" role="presentation">
             <button class="nav-link" id="passlips-tab" data-bs-toggle="tab" data-bs-target="#passlips" type="button" role="tab">Passlip Requests</button>
         </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="checkouts-tab" data-bs-toggle="tab" data-bs-target="#checkouts" type="button" role="tab">Check-Out Requests</button>
+        </li>
     </ul>
 
     <div class="tab-content" id="requestsTabContent">
@@ -192,36 +195,108 @@ include 'includes/header.php';
                                 if (mysqli_num_rows($result) == 0) {
                                     echo '<tr><td colspan="8" class="text-center text-muted">No passlips found.</td></tr>';
                                 } else {
-                                while ($row = mysqli_fetch_assoc($result)):
+                                    while ($row = mysqli_fetch_assoc($result)):
                                 ?>
-                                    <tr>
-                                        <td><?php echo $row['full_name']; ?></td>
-                                        <td><?php echo $row['departure_date'] . ' ' . $row['departure_time']; ?></td>
-                                        <td><?php echo $row['return_date'] . ' ' . $row['return_time']; ?></td>
-                                        <td><?php echo $row['destination']; ?></td>
-                                        <td><?php echo $row['purpose']; ?></td>
-                                        <td>
-                                            <?php if ($row['status'] === 'Pending'): ?>
-                                                <span class="badge bg-warning">Pending</span>
-                                            <?php elseif ($row['status'] === 'Approved'): ?>
-                                                <span class="badge bg-success">Approved</span>
-                                            <?php else: ?>
-                                                <span class="badge bg-danger">Rejected</span>
-                                            <?php endif; ?>
-                                        </td>
-                                        <td><?php echo date('M d, Y', strtotime($row['created_at'])); ?></td>
-                                        <td>
-                                            <?php if ($row['status'] === 'Pending'): ?>
-                                                <form method="POST" action="../includes/processes.php" class="d-inline">
-                                                    <input type="hidden" name="passlip_id" value="<?php echo $row['id']; ?>">
-                                                    <button type="submit" name="approve_passlip" class="btn btn-sm btn-success">Approve</button>
-                                                    <button type="submit" name="reject_passlip" class="btn btn-sm btn-danger">Reject</button>
-                                                </form>
-                                            <?php endif; ?>
-                                        </td>
-                                    </tr>
-                                <?php endwhile; 
-                                }?>
+                                        <tr>
+                                            <td><?php echo $row['full_name']; ?></td>
+                                            <td><?php echo $row['departure_date'] . ' ' . $row['departure_time']; ?></td>
+                                            <td><?php echo $row['return_date'] . ' ' . $row['return_time']; ?></td>
+                                            <td><?php echo $row['destination']; ?></td>
+                                            <td><?php echo $row['purpose']; ?></td>
+                                            <td>
+                                                <?php if ($row['status'] === 'Pending'): ?>
+                                                    <span class="badge bg-warning">Pending</span>
+                                                <?php elseif ($row['status'] === 'Approved'): ?>
+                                                    <span class="badge bg-success">Approved</span>
+                                                <?php else: ?>
+                                                    <span class="badge bg-danger">Rejected</span>
+                                                <?php endif; ?>
+                                            </td>
+                                            <td><?php echo date('M d, Y', strtotime($row['created_at'])); ?></td>
+                                            <td>
+                                                <?php if ($row['status'] === 'Pending'): ?>
+                                                    <form method="POST" action="../includes/processes.php" class="d-inline">
+                                                        <input type="hidden" name="passlip_id" value="<?php echo $row['id']; ?>">
+                                                        <button type="submit" name="approve_passlip" class="btn btn-sm btn-success">Approve</button>
+                                                        <button type="submit" name="reject_passlip" class="btn btn-sm btn-danger">Reject</button>
+                                                    </form>
+                                                <?php endif; ?>
+                                            </td>
+                                        </tr>
+                                <?php endwhile;
+                                } ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Check-Out Requests Tab -->
+        <div class="tab-pane fade" id="checkouts" role="tabpanel">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <h5 class="fw-bold text-maroon mb-3">Check-Out Requests</h5>
+                    <div class="table-responsive" style="min-height: 300px;">
+                        <table class="table table-striped align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Student</th>
+                                    <th>Room</th>
+                                    <th>Reason</th>
+                                    <th>Checkout Date</th>
+                                    <th>Checkout Time</th>
+                                    <th>Total Fees Due</th>
+                                    <th>Status</th>
+                                    <th>Date Submitted</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php
+                                $query = "
+                            SELECT co.*, u.full_name, ra.room_num
+                            FROM checkouts co
+                            JOIN user_personal_information u ON co.student_id = u.student_id
+                            LEFT JOIN room_assignments ra ON u.student_id = ra.student_id
+                            ORDER BY co.id DESC
+                        ";
+                                $result = mysqli_query($conn, $query);
+
+                                if (mysqli_num_rows($result) == 0) {
+                                    echo '<tr><td colspan="6" class="text-center text-muted">No check-out requests found.</td></tr>';
+                                } else {
+                                    while ($row = mysqli_fetch_assoc($result)):
+                                ?>
+                                        <tr>
+                                            <td><?php echo htmlspecialchars($row['full_name']); ?></td>
+                                            <td><?php echo htmlspecialchars($row['checkout_room']); ?></td>
+                                            <td><?php echo htmlspecialchars($row['reason']); ?></td>
+                                            <td><?php echo htmlspecialchars($row['checkout_date']); ?></td>
+                                            <td><?php echo htmlspecialchars($row['checkout_time']); ?></td>
+                                            <td><?php echo htmlspecialchars($row['total_due']); ?></td>
+                                            <td><?php if (is_null($row['approved_at'])):
+                                                    echo "<span class='badge bg-warning'>Pending</span>";
+                                                endif;
+                                                ?></td>
+                                            <td><?php echo date('M d, Y', strtotime($row['created_at'])); ?></td>
+                                            <td>
+                                                <?php if (is_null($row['approved_at'])): // Pending 
+                                                ?>
+                                                    <form method="POST" action="../includes/processes.php" class="d-inline">
+                                                        <input type="hidden" name="checkout_id" value="<?php echo $row['id']; ?>">
+                                                        <button type="submit" name="approve_checkout" class="btn btn-sm btn-success">Approve</button>
+                                                        <button type="submit" name="reject_checkout" class="btn btn-sm btn-danger">Reject</button>
+                                                    </form>
+                                                <?php else: // Approved 
+                                                ?>
+                                                    <span class="badge bg-success">Approved</span>
+                                                <?php endif; ?>
+                                            </td>
+                                        </tr>
+                                <?php
+                                    endwhile;
+                                }
+                                ?>
                             </tbody>
                         </table>
                     </div>
