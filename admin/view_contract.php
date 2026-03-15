@@ -26,6 +26,9 @@ $contract = mysqli_fetch_assoc($result);
 if (!$contract) {
     die('Contract not found.');
 }
+
+$managerQuery = mysqli_query($conn, "SELECT setting_value FROM system_settings WHERE setting_key='dorm_manager'");
+$manager = mysqli_fetch_assoc($managerQuery)['setting_value'] ?? 'Dorm Manager';
 ?>
 
 <style>
@@ -119,7 +122,7 @@ if (!$contract) {
 
     <p class="mb-0">This Accommodation and Housing Contract is executed this <b><?= date('Y-m-d'); ?></b> by and between:</p>
 
-    <p class="m-0"><b>Cristine Joy O. Pera</b> (Dormitory Manager), of legal age, Filipino citizen and a resident of <b>Pula, Tagudin, Ilocos Sur</b>, Acting on her capacity as the Dormitory Manager of Ladies' Dormitory of Ilocos Sur Polytechnic State College (ISPSC) Main Campus,
+    <p class="m-0"><b><?= htmlspecialchars($manager) ?></b> (Dormitory Manager), of legal age, Filipino citizen and a resident of <b>Pula, Tagudin, Ilocos Sur</b>, Acting on her capacity as the Dormitory Manager of Ladies' Dormitory of Ilocos Sur Polytechnic State College (ISPSC) Main Campus,
         a Higher Educational Institution located at San Nicolas, Candon City, Ilocos Sur.</p>
 
     <p class="text-center m-0"><b>-and-</b></p>

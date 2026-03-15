@@ -1,11 +1,71 @@
 <?php
 session_start();
+include "config/conn.php";
+
 if (isset($_SESSION['student_id'])) {
     header("Location: student/dashboard.php");
     exit;
 }
 
-// SweetAlert messages
+/* CHECK AVAILABLE SLOTS */
+$query = "SELECT 
+            SUM(capacity) AS total_capacity,
+            SUM(occupied) AS total_occupied
+          FROM rooms";
+
+$result = mysqli_query($conn, $query);
+$row = mysqli_fetch_assoc($result);
+
+$total_capacity = $row['total_capacity'] ?? 0;
+$total_occupied = $row['total_occupied'] ?? 0;
+$available_slots = $total_capacity - $total_occupied;
+
+/* IF NO AVAILABLE SLOT */
+if ($available_slots <= 0) {
+?>
+    <!DOCTYPE html>
+    <html>
+
+    <head>
+        <title>Dorm Full</title>
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    </head>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, rgba(86, 24, 24, 0.8), rgba(52, 65, 42, 0.8), rgba(112, 93, 49, 0.7)),
+                url('assets/img/dorm-bg.jpg') center/cover no-repeat;
+            backdrop-filter: blur(5px);
+            padding: 40px;
+        }
+    </style>
+
+    <body>
+
+        <script>
+            Swal.fire({
+                icon: 'warning',
+                title: 'Dormitory Full',
+                text: 'Sorry, there are currently no available dormitory slots.',
+                confirmButtonText: 'Back to Homepage',
+                confirmButtonColor: '#7a1e1e'
+            }).then(() => {
+                window.location.href = "index.php";
+            });
+        </script>
+
+    </body>
+
+    </html>
+<?php
+    exit;
+}
+
+/* SweetAlert messages */
 $success = $_GET['success'] ?? null;
 $error = $_GET['error'] ?? null;
 ?>
@@ -359,8 +419,20 @@ $error = $_GET['error'] ?? null;
 
                     <div class="col-md-6">
                         <label>Blood Type</label>
-                        <input type="text" name="blood_type" class="form-control" required>
+                        <select name="blood_type" class="form-control" required>
+                            <option value="" selected disabled>Select Blood Type</option>
+                            <option value="A+">A+</option>
+                            <option value="A-">A-</option>
+                            <option value="B+">B+</option>
+                            <option value="B-">B-</option>
+                            <option value="AB+">AB+</option>
+                            <option value="AB-">AB-</option>
+                            <option value="O+">O+</option>
+                            <option value="O-">O-</option>
+                            <option value="Unknown">Unknown</option>
+                        </select>
                     </div>
+
                     <div class="col-md-6">
                         <label>Known Allergies</label>
                         <input type="text" name="allergies" class="form-control" placeholder="e.g. Food, Drugs, Others" required>

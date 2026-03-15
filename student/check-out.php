@@ -71,14 +71,15 @@ $contract = mysqli_fetch_assoc($contractResult);
                 </div>
 
                 <!-- Reason -->
-                <h6 class="fw-semibold mb-2">Reason for Check-Out</h6>
                 <div class="mb-3">
                     <input type="checkbox" name="reason[]" value="End of Semester"> End of Semester<br>
                     <input type="checkbox" name="reason[]" value="Graduation"> Graduation / Completion<br>
                     <input type="checkbox" name="reason[]" value="Transfer"> Transfer Institution<br>
                     <input type="checkbox" name="reason[]" value="Violation"> Violation of Rules<br>
                     <input type="checkbox" name="reason[]" value="Personal"> Personal / Family Reasons<br>
-                    <input type="checkbox" name="reason[]" value="Other"> Other
+                    <input type="checkbox" name="reason[]" value="Other" id="otherReasonCheckbox"> Other
+                    <!-- Hidden input box for "Other" -->
+                    <input type="text" name="reason[]" id="otherReasonInput" class="form-control mt-2" placeholder="Specify reason" style="display:none;">
                 </div>
 
                 <!-- Financial -->
@@ -108,4 +109,18 @@ $contract = mysqli_fetch_assoc($contractResult);
         </div>
     <?php endif; ?>
 </div>
+<script>
+    const otherCheckbox = document.getElementById('otherReasonCheckbox');
+    const otherInput = document.getElementById('otherReasonInput');
+
+    otherCheckbox.addEventListener('change', function() {
+        if (this.checked) {
+            otherInput.style.display = 'block';
+            otherInput.focus();
+        } else {
+            otherInput.style.display = 'none';
+            otherInput.value = '';
+        }
+    });
+</script>
 <?php include 'includes/footer.php'; ?>

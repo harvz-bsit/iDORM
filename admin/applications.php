@@ -156,53 +156,128 @@ $result = $conn->query("SELECT * FROM application_approvals WHERE status='Pendin
         });
     });
 
-    // Handle Approve / Reject Actions
     document.addEventListener('DOMContentLoaded', function() {
-        ['approveBtn', 'rejectBtn'].forEach(btnId => {
-            document.getElementById(btnId).addEventListener('click', function() {
-                const studentId = this.dataset.id;
-                const action = btnId === 'approveBtn' ? 'approve' : 'reject';
-                const confirmText = action === 'approve' ? 'approve this applicant' : 'reject this applicant';
+
+        document.getElementById('approveBtn').addEventListener('click', function() {
+
+            const studentId = this.dataset.id;
+
+            Swal.fire({
+                title: 'Approve Applicant?',
+                text: 'You are about to approve this applicant.',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#198754',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Yes, approve'
+            }).then((result) => {
+
+                if (result.isConfirmed) {
+
+                    fetch('../includes/approval_action.php', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/x-www-form-urlencoded'
+                            },
+                            body: new URLSearchParams({
+                                action: 'approve',
+                                student_id: studentId
+                            })
+                        })
+                        .then(res => res.json())
+                        .then(data => {
+
+                            if (data.status === 'success') {
+                                Swal.fire({
+                                    title: 'Approved!',
+                                    text: data.message,
+                                    icon: 'success',
+                                    timer: 1500,
+                                    showConfirmButton: false
+                                }).then(() => location.reload());
+                            } else {
+                                Swal.fire('Error', data.message, 'error');
+                            }
+
+                        });
+                }
+            });
+
+        });
+
+
+
+        document.getElementById('rejectBtn').addEventListener('click', function() {
+
+            const studentId = this.dataset.id;
+
+            // Close the bootstrap modal first
+            const modal = bootstrap.Modal.getInstance(document.getElementById('viewModal'));
+            modal.hide();
+
+            setTimeout(() => {
 
                 Swal.fire({
-                    title: 'Are you sure?',
-                    text: `You are about to ${confirmText}.`,
-                    icon: 'question',
+                    title: 'Reject Applicant',
+                    input: 'textarea',
+                    inputLabel: 'Reason for rejection',
+                    inputPlaceholder: 'Type the reason for rejection...',
+                    inputAttributes: {
+                        'aria-label': 'Reason for rejection'
+                    },
+                    icon: 'warning',
                     showCancelButton: true,
-                    confirmButtonColor: action === 'approve' ? '#198754' : '#dc3545',
+                    confirmButtonColor: '#dc3545',
                     cancelButtonColor: '#6c757d',
-                    confirmButtonText: `Yes, ${action}`,
+                    confirmButtonText: 'Reject Applicant',
+                    cancelButtonText: 'Cancel',
+                    inputValidator: (value) => {
+                        if (!value) {
+                            return 'You must provide a reason!';
+                        }
+                    }
+
                 }).then((result) => {
+
                     if (result.isConfirmed) {
+
                         fetch('../includes/approval_action.php', {
                                 method: 'POST',
                                 headers: {
                                     'Content-Type': 'application/x-www-form-urlencoded'
                                 },
                                 body: new URLSearchParams({
-                                    action,
-                                    student_id: studentId
+                                    action: 'reject',
+                                    student_id: studentId,
+                                    reason: result.value
                                 })
                             })
                             .then(res => res.json())
                             .then(data => {
+
                                 if (data.status === 'success') {
+
                                     Swal.fire({
-                                        title: 'Success!',
-                                        text: data.message,
                                         icon: 'success',
-                                        showConfirmButton: false,
-                                        timer: 1500
+                                        title: 'Applicant Rejected',
+                                        text: data.message,
+                                        timer: 1500,
+                                        showConfirmButton: false
                                     }).then(() => {
                                         location.reload();
                                     });
+
                                 } else {
                                     Swal.fire('Error', data.message, 'error');
                                 }
+
                             });
                     }
+
                 });
-            });
+
+            }, 300); // wait for modal animation to finish
+
         });
     });
 </script>

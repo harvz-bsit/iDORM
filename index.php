@@ -30,6 +30,38 @@ if (isset($_SESSION['student_id'])) {
 
 <div class="divider my-4 mx-auto"></div>
 
+<div class="card shadow-sm border-0">
+    <div class="card-body text-center">
+        <h4 class="text-muted mb-1">Available Slots / Space</h4>
+
+        <?php
+        include 'config/conn.php'; // your DB connection
+
+        $query = "SELECT 
+                    SUM(capacity) AS total_capacity,
+                    SUM(occupied) AS total_occupied
+                  FROM rooms";
+
+        $result = mysqli_query($conn, $query);
+        $row = mysqli_fetch_assoc($result);
+
+        $capacity = $row['total_capacity'] ?? 0;
+        $occupied = $row['total_occupied'] ?? 0;
+        $available = $capacity - $occupied;
+        ?>
+
+        <h1 class="fw-bold text-maroon">
+            <?php echo $available; ?>
+        </h1>
+
+        <small class="text-secondary">
+            <?php echo $occupied; ?> / <?php echo $capacity; ?> Occupied
+        </small>
+    </div>
+</div>
+
+<div class="divider my-4 mx-auto"></div>
+
 <!-- Facilities Section -->
 <section id="rooms" class="container py-5">
     <h2 class="text-center text-maroon fw-bold mb-5">Facilities & Amenities</h2>
@@ -38,7 +70,7 @@ if (isset($_SESSION['student_id'])) {
         <!-- Lobby -->
         <div class="col-md-4">
             <div class="card room-card shadow-sm border-0 h-100">
-                <img src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=1200" class="card-img-top" alt="Lobby">
+                <img src="assets/img/landing/lobby.jpg" class="card-img-top" alt="Lobby">
                 <div class="card-body text-center">
                     <h5 class="fw-bold text-maroon">Lobby & Reception Area</h5>
                     <p>Warm and welcoming entrance where residents and guests are greeted. Includes a waiting lounge and information desk.</p>
@@ -49,7 +81,7 @@ if (isset($_SESSION['student_id'])) {
         <!-- Study Room -->
         <div class="col-md-4">
             <div class="card room-card shadow-sm border-0 h-100">
-                <img src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=1200" class="card-img-top" alt="Study Room">
+                <img src="assets/img/landing/studyarea.jpg" class="card-img-top" alt="Study Room">
                 <div class="card-body text-center">
                     <h5 class="fw-bold text-maroon">Study Room</h5>
                     <p>A quiet and comfortable area designed for focused study sessions and group discussions.</p>
@@ -60,7 +92,7 @@ if (isset($_SESSION['student_id'])) {
         <!-- Pantry -->
         <div class="col-md-4">
             <div class="card room-card shadow-sm border-0 h-100">
-                <img src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=1200" class="card-img-top" alt="Pantry">
+                <img src="assets/img/landing/kitchenarea.jpg" class="card-img-top" alt="Pantry">
                 <div class="card-body text-center">
                     <h5 class="fw-bold text-maroon">Pantry & Dining Area</h5>
                     <p>Equipped with tables, chairs, and basic kitchen facilities for residents to enjoy their meals comfortably.</p>
@@ -71,18 +103,14 @@ if (isset($_SESSION['student_id'])) {
         <!-- Laundry Room -->
         <div class="col-md-4">
             <div class="card room-card shadow-sm border-0 h-100">
-                <img src="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=1200" class="card-img-top" alt="Laundry Room">
-                <div class="card-body text-center">
-                    <h5 class="fw-bold text-maroon">Laundry Room</h5>
-                    <p>Modern and accessible laundry area with washing machines and drying racks for residents’ convenience.</p>
-                </div>
+                <img src="assets/img/landing/bed1.jpg" class="card-img-top" alt="Laundry Room">
             </div>
         </div>
 
         <!-- Shared Bedroom -->
         <div class="col-md-4">
             <div class="card room-card shadow-sm border-0 h-100">
-                <img src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=1200" class="card-img-top" alt="Shared Bedroom">
+                <img src="assets/img/landing/sharedbedroom.jpg" class="card-img-top" alt="Shared Bedroom">
                 <div class="card-body text-center">
                     <h5 class="fw-bold text-maroon">Shared Bedroom</h5>
                     <p>Spacious and well-maintained rooms ideal for female students, offering comfort and community living.</p>
@@ -93,11 +121,7 @@ if (isset($_SESSION['student_id'])) {
         <!-- Outdoor Area -->
         <div class="col-md-4">
             <div class="card room-card shadow-sm border-0 h-100">
-                <img src="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=1200" class="card-img-top" alt="Outdoor Area">
-                <div class="card-body text-center">
-                    <h5 class="fw-bold text-maroon">Outdoor Area</h5>
-                    <p>A relaxing open space where residents can unwind, enjoy fresh air, and build friendships.</p>
-                </div>
+                <img src="assets/img/landing/bed2.jpg" class="card-img-top" alt="Outdoor Area">
             </div>
         </div>
 

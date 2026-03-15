@@ -9,7 +9,13 @@ include 'includes/header.php';
         <h2 class="fw-bold text-maroon">Student Payments</h2>
         <p class="text-muted">Review uploaded receipts and manage payments.</p>
     </div>
-
+    <!-- ===== Search Bar ===== -->
+    <div class="mb-3 d-flex justify-content-end">
+        <div class="input-group" style="max-width: 350px;">
+            <span class="input-group-text"><i class="bi bi-search"></i></span>
+            <input type="text" id="paymentSearchInput" class="form-control" placeholder="Search student, month, status...">
+        </div>
+    </div>
     <!-- Payments Table -->
     <div class="card border-0 shadow-sm">
         <div class="card-body">
@@ -151,5 +157,34 @@ include 'includes/header.php';
             });
     }
 </script>
+<script>
+    const paymentSearchInput = document.getElementById('paymentSearchInput');
+    const paymentTableBody = document.querySelector('#adminPaymentsTable tbody');
 
+    paymentSearchInput.addEventListener('input', function() {
+        const filter = this.value.toLowerCase();
+        let visibleCount = 0;
+
+        Array.from(paymentTableBody.rows).forEach(row => {
+            const text = row.innerText.toLowerCase();
+            if (text.includes(filter)) {
+                row.style.display = '';
+                visibleCount++;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+
+        // Optional: show a "No results" row
+        let noMatchRow = document.getElementById('noPaymentMatch');
+        if (!noMatchRow) {
+            noMatchRow = document.createElement('tr');
+            noMatchRow.id = 'noPaymentMatch';
+            noMatchRow.innerHTML = `<td colspan="7" class="text-center text-muted">No matching payments found.</td>`;
+            paymentTableBody.appendChild(noMatchRow);
+        }
+
+        noMatchRow.style.display = visibleCount === 0 ? '' : 'none';
+    });
+</script>
 <?php include 'includes/footer.php'; ?>
